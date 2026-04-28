@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { MOCK_CART } from "../../modules/mock";
 
 export default function AppHeader() {
   return (
@@ -23,11 +22,6 @@ export default function AppHeader() {
               <Nav.Link as={Link} to="/" eventKey="catalog">
                 Каталог планет
               </Nav.Link>
-              {MOCK_CART.has_draft && MOCK_CART.id != null ? (
-                <Nav.Link as={Link} to={`/interplanetary-flight/${MOCK_CART.id}`} eventKey="flight">
-                  Межпланетная заявка
-                </Nav.Link>
-              ) : null}
             </Nav>
           </Navbar.Collapse>
         </div>

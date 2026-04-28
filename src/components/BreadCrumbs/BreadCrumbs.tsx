@@ -34,14 +34,6 @@ export default function BreadCrumbs() {
       return [{ label: "Главная", to: "/" }, { label: title }];
     }
 
-    const flightMatch = matchPath(ROUTES.INTERPLANETARY_FLIGHT, pathname);
-    if (flightMatch?.params.id) {
-      return [
-        { label: "Главная", to: "/" },
-        { label: `Межпланетная заявка №${flightMatch.params.id}` },
-      ];
-    }
-
     return [{ label: "Главная", to: "/" }, { label: "Страница" }];
   })();
 

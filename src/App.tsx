@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-
 import MainLayout from "./layouts/MainLayout";
 import PlanetsPage from "./pages/PlanetsPage/PlanetsPage";
 import PlanetPage from "./pages/PlanetPage/PlanetPage";
-import InterplanetaryFlightRequestPage from "./pages/InterplanetaryFlightRequestPage/InterplanetaryFlightRequestPage";
 import { ROUTES } from "./routePaths";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./cosmos-styles.css";
@@ -13,9 +12,8 @@ function RedirectLegacyStrategyToPlanet() {
   return <Navigate to={`/planet/${id}`} replace />;
 }
 
-function RedirectLegacySystemLoadToFlight() {
-  const { id } = useParams();
-  return <Navigate to={`/interplanetary-flight/${id ?? "1"}`} replace />;
+function RedirectLegacySystemLoadToHome() {
+  return <Navigate to={ROUTES.PLANETS} replace />;
 }
 
 function App() {
@@ -27,8 +25,7 @@ function App() {
           <Route path="/strategies" element={<Navigate to="/" replace />} />
           <Route path="/strategy/:id" element={<RedirectLegacyStrategyToPlanet />} />
           <Route path={ROUTES.PLANET} element={<PlanetPage />} />
-          <Route path={ROUTES.INTERPLANETARY_FLIGHT} element={<InterplanetaryFlightRequestPage />} />
-          <Route path="/system_load/:id" element={<RedirectLegacySystemLoadToFlight />} />
+          <Route path="/system_load/:id" element={<RedirectLegacySystemLoadToHome />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -9,29 +9,10 @@ import { calculateHohmannDeltaVms, calculatePropellantKg } from "../cosmosApi";
 const DEFAULT_IMAGE = "/mock/Earth.jpg";
 const DEFAULT_VIDEO = "/mock/Earth_vid.mp4";
 
-/** Имя файла картинки в public/mock (растр). Юпитер — .jpeg как в ваших файлах. */
-const PLANET_IMAGE_FILE: Record<string, string> = {
-  Юпитер: "Jupiter.jpeg",
-  Сатурн: "Saturn.jpg",
-  Уран: "Uranus.jpg",
-  Нептун: "Neptune.jpg",
-};
-
-/** Обратные перелёты и любые неизвестные названия — Earth по умолчанию. */
+/** По требованиям лабы используем одну и ту же картинку везде. */
 function planetImageVideo(title: string): { image: string; video: string } {
-  if (title.startsWith("Обратный")) {
-    return { image: DEFAULT_IMAGE, video: DEFAULT_VIDEO };
-  }
-  const file = PLANET_IMAGE_FILE[title];
-  if (!file) {
-    return { image: DEFAULT_IMAGE, video: DEFAULT_VIDEO };
-  }
-  const image = `/mock/${file}`;
-  // Видео Земли по умолчанию для всех, кроме Сатурна (у него своё Saturn_vid.mp4).
-  if (title === "Сатурн") {
-    return { image, video: "/mock/Saturn_vid.mp4" };
-  }
-  return { image, video: DEFAULT_VIDEO };
+  void title;
+  return { image: DEFAULT_IMAGE, video: DEFAULT_VIDEO };
 }
 
 /** Каталог планет (услуга) — данные как в lab1 Go `GetInterplanetaryFlights`. */
