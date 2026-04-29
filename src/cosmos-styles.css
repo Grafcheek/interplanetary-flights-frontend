@@ -216,6 +216,19 @@ img {
     background: #111111;
 }
 
+.interplanetary-flight-request-link--disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    color: #6b6b70;
+    border-color: #3a3a3e;
+    background: #141416;
+}
+
+.interplanetary-flight-request-link--disabled .interplanetary-flight-request-link__badge {
+    background: #3a3a3e;
+    color: #9a9aa0;
+}
+
 .interplanetary-flight-request-link svg {
     color: inherit;
 }
@@ -939,4 +952,437 @@ a.card img {
 
 .spinner-border {
     color: #000000 !important;
+}
+
+.clip-search-section {
+    margin-bottom: 20px;
+}
+
+.clip-search-section__panel {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: #000000;
+    border: 1px solid #2e2e32;
+    padding: 12px;
+}
+
+.clip-search-section__file-input {
+    display: none;
+}
+
+.clip-search-section__preview-wrap {
+    width: 80px;
+    height: 80px;
+    border: 1px dashed #3f464d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0c0c0c;
+}
+
+.clip-search-section__preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.clip-search-section__placeholder-image {
+    font-size: 12px;
+    color: #959599;
+    text-align: center;
+    padding: 0 4px;
+}
+
+.clip-search-section__action-panel {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.clip-results-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.clip-result-row {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    gap: 12px;
+    border: 1px solid #2e2e32;
+    padding: 10px;
+    color: #ffffff;
+    background: #000000;
+}
+
+.clip-result-row__image {
+    width: 96px;
+    height: 72px;
+    object-fit: cover;
+}
+
+.clip-result-row__content h5 {
+    margin: 0 0 4px 0;
+    font-size: 17px;
+    color: #ffffff;
+}
+
+.clip-result-row__content p {
+    margin: 0;
+    font-size: 13px;
+    color: #959599;
+}
+
+.clip-result-row__stats {
+    align-self: center;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.clip-search-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.clip-search-section .progress {
+    min-width: 160px;
+    background: #1a1a1a;
+    border-radius: 0;
+    border: 1px solid #2e2e32;
+}
+
+.clip-search-section .progress-bar {
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: 700;
+}
+
+/* ===== Скопировано из lab2: system_load (templates/system_load.html + resources/css/styles.css) ===== */
+
+.mission-page-lab2 {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Иконка заявки в тулбаре (system_load) */
+.system-load-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 0;
+    background: #000000;
+    border: 1px solid var(--color-border);
+    color: #ffffff;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.system-load-icon:hover:not(.system-load-icon--disabled) {
+    border-color: #ffffff;
+    color: #ffffff;
+    background: #111111;
+}
+
+.system-load-icon--disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    color: #6b6b70;
+    border-color: #3a3a3e;
+    background: #141416;
+}
+
+.system-load-icon--disabled .system-load-icon__badge {
+    background: #3a3a3e;
+    color: #9a9aa0;
+}
+
+.system-load-icon svg {
+    color: inherit;
+}
+
+.system-load-icon__badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 0;
+    background: #ffffff;
+    color: #000000;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    box-sizing: border-box;
+}
+
+.mission-basket-page {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.system-load-detail__delete-form {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.system-load-detail__delete-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: 1px solid rgba(175, 17, 8, 0.55);
+    background: rgba(175, 17, 8, 0.12);
+    color: #e8e8e8;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+}
+
+.system-load-detail__delete-icon:hover {
+    border-color: var(--color-error);
+    color: #ffffff;
+    background: rgba(175, 17, 8, 0.35);
+    transform: scale(1.04);
+}
+
+/* Страница заявки (system_load) */
+.system-load-detail {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.system-load-detail__header-card {
+    background-color: var(--color-card-soft);
+    border-radius: 0;
+    padding: 32px 32px;
+    margin-bottom: 32px;
+    border: 1px solid var(--color-border);
+}
+
+.system-load-detail__header-top {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.system-load-detail__header-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.system-load-detail__title {
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 29px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 12px;
+}
+
+.system-load-detail__description {
+    font-family: "Public Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--color-muted);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Сегменты заявки */
+.basket-segments {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.basket-segments__head,
+.basket-segment__row {
+    display: grid;
+    grid-template-columns: 88px minmax(120px, 1.1fr) minmax(90px, 1fr) minmax(90px, 1fr) minmax(6.5rem, 0.85fr) minmax(7.5rem, 0.85fr);
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--color-border);
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.basket-segments__head {
+    background-color: #000000;
+}
+
+.basket-segments__cell {
+    padding: 12px 14px;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14.08px;
+    color: var(--color-muted);
+    text-align: left;
+}
+
+.basket-segments__head .basket-segments__cell {
+    font-family: "Public Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-muted);
+    padding: 10px 12px;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.basket-segments__head .basket-segments__cell:first-child {
+    border-left: 1px solid var(--color-border);
+}
+
+.basket-segments__head .basket-segments__cell:last-child {
+    border-right: 1px solid var(--color-border);
+}
+
+.basket-segments__cell--thumb {
+    padding: 10px;
+}
+
+.basket-segments__cell--thumb img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    background: #000000;
+    display: block;
+}
+
+.basket-segments__cell--num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+.basket-segments__cell--fuel {
+    text-align: right;
+    justify-self: stretch;
+    padding-right: 16px !important;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+.basket-segments__cell--strong {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.basket-segments__cell--highlight {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.basket-segment {
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s ease;
+}
+
+.basket-segment:hover .basket-segment__row {
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.basket-segment__panel {
+    border: 1px solid var(--color-border);
+    border-top: none;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 14px 16px;
+}
+
+.basket-segment__form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px 20px;
+}
+
+.basket-segment__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.basket-segment__field-name {
+    font-size: 12px;
+    color: var(--color-muted);
+}
+
+.basket-segment__input {
+    width: 120px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    background: #000000;
+    color: #ffffff;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+}
+
+.basket-segment__input:focus {
+    outline: none;
+    border-color: #ffffff;
+}
+
+.basket-segment__submit {
+    height: 40px;
+    padding: 0 20px;
+    border: 1px solid #ffffff;
+    background: #ffffff;
+    color: #000000;
+    font-family: "Public Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.basket-segment__submit:hover {
+    background: #e8e8e8;
+}
+
+@media (max-width: 640px) {
+    .system-load-detail__header-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .system-load-detail__delete-form {
+        align-self: flex-end;
+    }
+
+    .basket-segments {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .basket-segments__head,
+    .basket-segment__row {
+        min-width: 640px;
+    }
+
+    .basket-segment__form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .basket-segment__input {
+        width: 100%;
+    }
+
+    .basket-segment__submit {
+        width: 100%;
+    }
 }

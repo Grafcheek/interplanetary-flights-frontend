@@ -34,6 +34,14 @@ export default function BreadCrumbs() {
       return [{ label: "Главная", to: "/" }, { label: title }];
     }
 
+    const missionMatch = matchPath(ROUTES.MISSION, pathname);
+    if (missionMatch?.params.id) {
+      return [
+        { label: "Главная", to: "/" },
+        { label: `Заявка № ${missionMatch.params.id}` },
+      ];
+    }
+
     return [{ label: "Главная", to: "/" }, { label: "Страница" }];
   })();
 

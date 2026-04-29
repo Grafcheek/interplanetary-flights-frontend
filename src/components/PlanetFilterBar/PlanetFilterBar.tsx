@@ -8,7 +8,11 @@ interface PlanetFilterBarProps {
   onSearch: () => void;
 }
 
-export default function PlanetFilterBar({ query, onQueryChange, onSearch }: PlanetFilterBarProps) {
+export default function PlanetFilterBar({
+  query,
+  onQueryChange,
+  onSearch,
+}: PlanetFilterBarProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSearch();
