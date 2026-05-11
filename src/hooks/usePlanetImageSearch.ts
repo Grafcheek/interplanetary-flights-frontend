@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cosineSimilarity } from "../modules/math";
 
 export type ClipSearchItem = { id: number; description: string };
@@ -139,20 +139,20 @@ export const usePlanetImageSearch = (initialItems: ClipSearchItem[], enabled: bo
     });
   }, [imageEmbedding]);
 
-  const searchByImage = (file: File) => {
+  const searchByImage = useCallback((file: File) => {
     if (!workerRef.current || !embeddingsReadyRef.current) {
       pendingFileRef.current = file;
       return;
     }
     workerRef.current.postMessage({ type: "image", data: file });
-  };
+  }, []);
 
-  const resetSearch = () => {
+  const resetSearch = useCallback(() => {
     setImageEmbedding(null);
     setItems((prev) =>
       [...prev].sort((a, b) => a.id - b.id).map((item) => ({ ...item, score: 0, isVisible: true })),
     );
-  };
+  }, []);
 
   return { items, ready, progress, imageEmbedding, workerError, searchByImage, resetSearch };
 };

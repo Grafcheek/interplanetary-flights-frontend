@@ -7,7 +7,12 @@ function photoSrc(image: string, imageError: boolean): string {
   return resolveMediaUrl(image);
 }
 
-export default function PlanetCard({ planet }: { planet: PlanetJSON }) {
+interface PlanetCardProps {
+  planet: PlanetJSON;
+  similarityPercent?: number;
+}
+
+export default function PlanetCard({ planet, similarityPercent }: PlanetCardProps) {
   const [imageError, setImageError] = useState(false);
   const [imageUrl, setImageUrl] = useState(photoSrc(planet.image, false));
 
@@ -28,6 +33,11 @@ export default function PlanetCard({ planet }: { planet: PlanetJSON }) {
         alt={planet.title}
         onError={handleImageError}
       />
+      {typeof similarityPercent === "number" ? (
+        <span className="card__similarity" aria-label={`Сходство ${similarityPercent.toFixed(1)} процентов`}>
+          {similarityPercent.toFixed(1)}%
+        </span>
+      ) : null}
       <div className="card__body">
         <div className="card__title-row">
           <h2 className="card__title">{planet.title}</h2>

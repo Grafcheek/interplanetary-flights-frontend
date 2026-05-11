@@ -133,6 +133,8 @@ type BackendRouteJSON = {
   from_orbit_radius_km?: number;
   ToOrbitKm?: number;
   to_orbit_radius_km?: number;
+  ShortDescriptionEn?: string;
+  short_description_en?: string;
 };
 
 function kmToAu(km: number): number {
@@ -155,6 +157,7 @@ function adaptBackendRoute(raw: BackendRouteJSON): PlanetJSON {
     to_orbit_au: kmToAu(toOrbitKm),
     launch_date: "",
     price_credits: 0,
+    short_description_en: raw.ShortDescriptionEn ?? raw.short_description_en,
   };
 }
 

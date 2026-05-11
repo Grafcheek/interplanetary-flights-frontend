@@ -6,12 +6,22 @@ interface PlanetFilterBarProps {
   query: string;
   onQueryChange: (query: string) => void;
   onSearch: () => void;
+  onImageUploadClick: () => void;
+  onClearImage: () => void;
+  clipButtonLabel: string;
+  disableClipSearch?: boolean;
+  disableClipReset?: boolean;
 }
 
 export default function PlanetFilterBar({
   query,
   onQueryChange,
   onSearch,
+  onImageUploadClick,
+  onClearImage,
+  clipButtonLabel,
+  disableClipSearch = false,
+  disableClipReset = false,
 }: PlanetFilterBarProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -31,6 +41,22 @@ export default function PlanetFilterBar({
       />
       <Button type="submit" className="search-btn">
         Найти
+      </Button>
+      <Button
+        type="button"
+        className="search-btn"
+        onClick={onImageUploadClick}
+        disabled={disableClipSearch}
+      >
+        {clipButtonLabel}
+      </Button>
+      <Button
+        type="button"
+        className="search-btn search-btn--ghost"
+        onClick={onClearImage}
+        disabled={disableClipReset}
+      >
+        Сбросить фото
       </Button>
     </Form>
   );

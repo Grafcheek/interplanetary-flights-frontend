@@ -1,16 +1,10 @@
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, ProgressBar } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
-import { Link } from "react-router-dom";
 import PlanetsList from "../../components/PlanetsList/PlanetsList";
 import PlanetFilterBar from "../../components/PlanetFilterBar/PlanetFilterBar";
 import type { PlanetJSON } from "../../cosmosApi";
-import {
-  fallbackImageUrl,
-  listPlanets,
-  planetClipDescription,
-  resolveMediaUrl,
-} from "../../cosmosApi";
+import { getFlightCart, listPlanets, planetClipDescription } from "../../cosmosApi";
 import { filterMockPlanetsByQuery, PLANETS_MOCK } from "../../modules/mock";
 import { usePlanetImageSearch } from "../../hooks/usePlanetImageSearch";
 
@@ -19,13 +13,14 @@ export default function PlanetsPage() {
   const [clipSourcePlanets, setClipSourcePlanets] = useState<PlanetJSON[]>(PLANETS_MOCK);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [clipSessionActive, setClipSessionActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
+      void getFlightCart();
       const list = await listPlanets();
       if (cancelled) return;
       const resolvedList = list.length > 0 ? list : filterMockPlanetsByQuery("");
@@ -57,6 +52,7 @@ export default function PlanetsPage() {
     try {
       const data = await listPlanets({ query });
       setPlanets(data);
+      setClipSourcePlanets(data);
     } finally {
       setLoading(false);
     }
@@ -70,31 +66,58 @@ export default function PlanetsPage() {
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (selectedImage?.startsWith("blob:")) URL.revokeObjectURL(selectedImage);
-    const imageUrl = URL.createObjectURL(file);
-    setSelectedImage(imageUrl);
-    searchByImage(file);
+    setSelectedImageFile(file);
   };
 
   const handleClearImage = () => {
-    if (selectedImage?.startsWith("blob:")) URL.revokeObjectURL(selectedImage);
-    setSelectedImage(null);
+    setSelectedImageFile(null);
     resetSearch();
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  useEffect(() => {
+    if (!clipReady || !selectedImageFile) return;
+    searchByImage(selectedImageFile);
+  }, [clipReady, searchByImage, selectedImageFile]);
+
   const imageSearchActive = Boolean(imageEmbedding);
   const visibleClipRows = imageSearchActive ? clipProcessed.filter((item) => item.isVisible) : [];
   const showClipProgress = clipSessionActive && clipItems.length > 0 && !clipReady && !workerError;
+  const clipButtonLabel = showClipProgress ? `Загрузка модели... ${clipProgress}%` : "Поиск по изображению";
+
+  const clipPlanets = useMemo(
+    () =>
+      visibleClipRows
+        .map((item) => planetById.get(item.id))
+        .filter((planet): planet is PlanetJSON => Boolean(planet)),
+    [planetById, visibleClipRows],
+  );
+
+  const clipSimilarityById = useMemo(
+    () => new Map(visibleClipRows.map((item) => [item.id, Number((item.score * 100).toFixed(1))])),
+    [visibleClipRows],
+  );
 
   return (
     <div className="planets-page">
       <div className="toolbar">
         <div className="toolbar-inner">
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            className="clip-search-section__file-input"
+            onChange={handleImageUpload}
+          />
           <PlanetFilterBar
             query={query}
             onQueryChange={setQuery}
             onSearch={handleSearch}
+            onImageUploadClick={handleUploadButtonClick}
+            onClearImage={handleClearImage}
+            clipButtonLabel={clipButtonLabel}
+            disableClipSearch={clipItems.length === 0 || showClipProgress}
+            disableClipReset={!selectedImageFile && !imageSearchActive}
           />
           <div className="toolbar-basket">
             <div
@@ -112,46 +135,7 @@ export default function PlanetsPage() {
       </div>
       <div className="space">
         <main className="planets-page__main">
-          <section className="clip-search-section">
-            {workerError ? (
-              <Alert variant="warning">Не удалось загрузить CLIP модель: {workerError}</Alert>
-            ) : null}
-            <div className="clip-search-section__panel">
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                className="clip-search-section__file-input"
-                onChange={handleImageUpload}
-              />
-              <div className="clip-search-section__preview-wrap">
-                {selectedImage ? (
-                  <img src={selectedImage} alt="" className="clip-search-section__preview-image" />
-                ) : (
-                  <div className="clip-search-section__placeholder-image">Фото для CLIP</div>
-                )}
-              </div>
-              <div className="clip-search-section__action-panel">
-                <button
-                  type="button"
-                  className="search-btn clip-search-btn"
-                  onClick={handleUploadButtonClick}
-                  disabled={clipItems.length === 0 || showClipProgress}
-                >
-                  {showClipProgress ? "Загрузка модели..." : "Поиск по изображению"}
-                </button>
-                {showClipProgress ? <ProgressBar now={clipProgress} label={`${clipProgress}%`} /> : null}
-                <button
-                  type="button"
-                  className="search-btn clip-search-btn"
-                  onClick={handleClearImage}
-                  disabled={!selectedImage}
-                >
-                  Сбросить
-                </button>
-              </div>
-            </div>
-          </section>
+          {workerError ? <Alert variant="warning">Не удалось загрузить CLIP модель: {workerError}</Alert> : null}
           {loading ? (
             <div className="planets-page__loading">
               <Spinner animation="border" role="status" aria-label="Загрузка">
@@ -160,36 +144,12 @@ export default function PlanetsPage() {
             </div>
           ) : imageSearchActive ? (
             <div className="planets-page__grid">
-              {visibleClipRows.length === 0 ? (
+              {clipPlanets.length === 0 ? (
                 <div className="planets-page__empty">
                   Нет подходящих перелетов выше порога. Попробуй другое изображение.
                 </div>
               ) : (
-                <ul className="clip-results-list">
-                  {visibleClipRows.map((item) => {
-                    const planet = planetById.get(item.id);
-                    if (!planet) return null;
-                    return (
-                      <li key={planet.planet_id}>
-                        <Link to={`/planet/${planet.planet_id}`} className="clip-result-row">
-                          <img
-                            src={resolveMediaUrl(planet.image) || fallbackImageUrl()}
-                            alt={planet.title}
-                            className="clip-result-row__image"
-                          />
-                          <div className="clip-result-row__content">
-                            <h5>{planet.title}</h5>
-                            <p>{planet.from} - {planet.to}</p>
-                            <p>{planet.description}</p>
-                          </div>
-                          <div className="clip-result-row__stats">
-                            <span>{(item.score * 100).toFixed(1)}%</span>
-                          </div>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <PlanetsList planets={clipPlanets} similarityById={clipSimilarityById} />
               )}
             </div>
           ) : (
