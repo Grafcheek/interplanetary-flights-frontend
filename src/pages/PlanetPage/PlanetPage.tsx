@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getMockPlanet, getMockSegmentForPlanet, PLANETS_MOCK } from "../../modules/mock";
-import { fallbackImageUrl, getPlanet, resolveMediaUrl, type PlanetJSON } from "../../cosmosApi";
+import { fallbackImageUrl, resolveMediaUrl, type PlanetJSON } from "../../cosmosApi";
+import { getPlanetAxios } from "../../modules/planetsApi";
 
 export default function PlanetPage() {
   const [planet, setPlanet] = useState<PlanetJSON | null>(null);
@@ -16,7 +17,7 @@ export default function PlanetPage() {
     setMediaError(false);
     let cancelled = false;
     const run = async () => {
-      const byApi = await getPlanet(Number(id));
+      const byApi = await getPlanetAxios(Number(id));
       const resolved =
         byApi ?? getMockPlanet(Number(id)) ?? PLANETS_MOCK.find((p) => p.planet_id === Number(id)) ?? null;
       if (!cancelled) setPlanet(resolved);

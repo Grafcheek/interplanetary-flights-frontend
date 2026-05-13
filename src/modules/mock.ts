@@ -4,7 +4,7 @@ import type {
   PlanetInRequestRowJSON,
   PlanetJSON,
 } from "../cosmosApi";
-import { calculateHohmannDeltaVms, calculatePropellantKg } from "../cosmosApi";
+import { calculateHohmannDeltaVms, calculatePropellantKg, planetVisualShortDescription } from "../cosmosApi";
 
 const DEFAULT_IMAGE = "/mock/Earth.jpg";
 const DEFAULT_VIDEO = "/mock/Earth_vid.mp4";
@@ -29,8 +29,7 @@ export const PLANETS_MOCK: PlanetJSON[] = [
     to_orbit_au: 5.204,
     launch_date: "2026-04-12",
     price_credits: 12800,
-    short_description_en:
-      "Transfer from Earth to Jupiter orbit with high delta-v and deep-space travel profile.",
+    short_description_en: planetVisualShortDescription("Юпитер"),
   },
   {
     planet_id: 2,
@@ -44,8 +43,7 @@ export const PLANETS_MOCK: PlanetJSON[] = [
     to_orbit_au: 9.583,
     launch_date: "2026-05-03",
     price_credits: 19250,
-    short_description_en:
-      "Mission to Saturn orbit with long transfer duration and increased propulsion requirements.",
+    short_description_en: planetVisualShortDescription("Сатурн"),
   },
   {
     planet_id: 3,
@@ -58,8 +56,7 @@ export const PLANETS_MOCK: PlanetJSON[] = [
     to_orbit_au: 19.218,
     launch_date: "2026-06-18",
     price_credits: 26500,
-    short_description_en:
-      "Long-range flight to Uranus orbit focused on fuel-heavy trajectory planning.",
+    short_description_en: planetVisualShortDescription("Уран"),
   },
   {
     planet_id: 4,
@@ -73,8 +70,7 @@ export const PLANETS_MOCK: PlanetJSON[] = [
     to_orbit_au: 30.11,
     launch_date: "2026-07-22",
     price_credits: 31040,
-    short_description_en:
-      "Deep outer-system route to Neptune orbit with the highest transfer energy demand.",
+    short_description_en: planetVisualShortDescription("Нептун"),
   },
   {
     planet_id: 5,
@@ -88,8 +84,7 @@ export const PLANETS_MOCK: PlanetJSON[] = [
     to_orbit_au: 1.0,
     launch_date: "2026-08-01",
     price_credits: 9800,
-    short_description_en:
-      "Return leg from Jupiter to Earth with lower mission cost than outbound transfer.",
+    short_description_en: planetVisualShortDescription("Юпитер"),
   },
   {
     planet_id: 6,
@@ -103,8 +98,7 @@ export const PLANETS_MOCK: PlanetJSON[] = [
     to_orbit_au: 1.0,
     launch_date: "2026-09-10",
     price_credits: 14200,
-    short_description_en:
-      "Return transfer from Saturn orbit back to Earth with moderate delta-v requirement.",
+    short_description_en: planetVisualShortDescription("Сатурн"),
   },
   {
     planet_id: 7,
@@ -118,8 +112,7 @@ export const PLANETS_MOCK: PlanetJSON[] = [
     to_orbit_au: 1.0,
     launch_date: "2026-10-05",
     price_credits: 22100,
-    short_description_en:
-      "Return trajectory from Uranus orbit to Earth using high-energy interplanetary braking.",
+    short_description_en: planetVisualShortDescription("Уран"),
   },
 ];
 

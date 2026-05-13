@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, matchPath, useLocation } from "react-router-dom";
 import { getMockPlanet } from "../../modules/mock";
+import { getPlanetAxios } from "../../modules/planetsApi";
 import { ROUTES } from "../../routePaths";
 
 type Crumb = { label: string; to?: string };
@@ -17,13 +18,42 @@ export default function BreadCrumbs() {
       return;
     }
     const id = Number(rawId);
-    const p = getMockPlanet(id);
-    setPlanetTitle(p?.title ?? `Планета ${id}`);
+    let cancelled = false;
+    const run = async () => {
+      const data = await getPlanetAxios(id);
+      if (cancelled) return;
+      if (data?.title) {
+        setPlanetTitle(data.title);
+        return;
+      }
+      const p = getMockPlanet(id);
+      setPlanetTitle(p?.title ?? `Планета ${id}`);
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
 
   const crumbs: Crumb[] = (() => {
-    if (pathname === "/" || pathname === "") {
+    if (pathname === ROUTES.PLANETS) {
       return [{ label: "Главная" }];
+    }
+
+    if (pathname === ROUTES.SIGN_IN) {
+      return [{ label: "Главная", to: ROUTES.PLANETS }, { label: "Вход" }];
+    }
+
+    if (pathname === ROUTES.SIGN_UP) {
+      return [{ label: "Главная", to: ROUTES.PLANETS }, { label: "Регистрация" }];
+    }
+
+    if (pathname === ROUTES.INTERPLANETARY_FLIGHTS) {
+      return [{ label: "Главная", to: ROUTES.PLANETS }, { label: "Заявки" }];
+    }
+
+    if (pathname === ROUTES.PROFILE) {
+      return [{ label: "Главная", to: ROUTES.PLANETS }, { label: "Личный кабинет" }];
     }
 
     const planetMatch = matchPath(ROUTES.PLANET, pathname);
@@ -31,18 +61,18 @@ export default function BreadCrumbs() {
       const title =
         planetTitle ??
         (planetMatch.params.id ? `Планета ${planetMatch.params.id}` : "Планета");
-      return [{ label: "Главная", to: "/" }, { label: title }];
+      return [{ label: "Главная", to: ROUTES.PLANETS }, { label: title }];
     }
 
-    const missionMatch = matchPath(ROUTES.MISSION, pathname);
-    if (missionMatch?.params.id) {
+    const flightMatch = matchPath(ROUTES.INTERPLANETARY_FLIGHT, pathname);
+    if (flightMatch?.params.id) {
       return [
-        { label: "Главная", to: "/" },
-        { label: `Заявка № ${missionMatch.params.id}` },
+        { label: "Главная", to: ROUTES.PLANETS },
+        { label: `Заявка № ${flightMatch.params.id}` },
       ];
     }
 
-    return [{ label: "Главная", to: "/" }, { label: "Страница" }];
+    return [{ label: "Главная", to: ROUTES.PLANETS }, { label: "Страница" }];
   })();
 
   return (

@@ -1,272 +1,284 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import BreadCrumbs from "../../components/BreadCrumbs/BreadCrumbs";
+import { useNavigate, useParams } from "react-router-dom";
+import { cloneInterplanetaryFlightDetail, MOCK_INTERPLANETARY_FLIGHT_DETAIL } from "../../modules/mock";
 import {
-  calculatePropellantKg,
   fallbackImageUrl,
-  getInterplanetaryFlightRequest,
   resolveMediaUrl,
+  type PlanetInRequestRowJSON,
 } from "../../cosmosApi";
-import type { InterplanetaryFlightRequestDetailJSON, PlanetInRequestRowJSON } from "../../cosmosApi";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {
+  deleteFlightRequest,
+  fetchFlightRequestDetail,
+  type FlightRequestDetail,
+  formFlightRequest,
+  removeFlightInRequestLine,
+  updateFlightInRequestLine,
+  updateFlightRequestDraft,
+} from "../../store/slices/flightRequestSlice";
+import { ROUTES } from "../../routePaths";
 
-type SegmentCalcParams = {
-  dryMassKg: number;
-  ispSec: number;
-};
-
-const DEFAULT_ISP_SEC = 320;
-
-function MissionLab2Header() {
-  return (
-    <header className="site-header site-header-main">
-      <div className="header-spacer" aria-hidden />
-      <Link to="/" className="header-home header-logo-center">
-        <img src="/logo.png" alt="Interplanetary flight" className="header-home__icon" />
-      </Link>
-      <div className="header-spacer" aria-hidden />
-    </header>
-  );
-}
-
-function defaultDryMassKg(detail: InterplanetaryFlightRequestDetailJSON | null): number {
-  const v = detail?.spacecraft_dry_mass_kg;
-  if (v != null && Number.isFinite(v) && v > 0) return Math.round(v);
-  return 2000;
+function buildMockDetail(id: number): FlightRequestDetail | null {
+  if (id !== MOCK_INTERPLANETARY_FLIGHT_DETAIL.interplanetary_flight_request_id) return null;
+  const base = cloneInterplanetaryFlightDetail(MOCK_INTERPLANETARY_FLIGHT_DETAIL);
+  return {
+    ...base,
+    status: "draft",
+    creator_login: "demo",
+    moderator_login: null,
+    forming_date: null,
+    finish_date: null,
+    created_at: new Date().toISOString(),
+  };
 }
 
 export default function MissionPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState<InterplanetaryFlightRequestDetailJSON | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [segmentParams, setSegmentParams] = useState<Record<number, SegmentCalcParams>>({});
-  const [searchQuery, setSearchQuery] = useState("");
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, isModerator } = useAppSelector((s) => s.user);
+  const { detail, detailLoading, detailError, applicationMutationLoading, itemMutationLoading } =
+    useAppSelector((s) => s.flightRequest);
+
+  const [mockData, setMockData] = useState<FlightRequestDetail | null>(null);
+  const [descriptionDraft, setDescriptionDraft] = useState("");
 
   useEffect(() => {
-    if (!id) {
-      setLoading(false);
-      setData(null);
+    if (!id || !isAuthenticated) return;
+    setMockData(null);
+    void dispatch(fetchFlightRequestDetail(Number(id))).then((a) => {
+      if (fetchFlightRequestDetail.rejected.match(a)) {
+        setMockData(buildMockDetail(Number(id)));
+      }
+    });
+  }, [id, isAuthenticated, dispatch]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate(ROUTES.SIGN_IN, { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  const data: FlightRequestDetail | null = detail ?? mockData;
+
+  useEffect(() => {
+    if (!data) return;
+    setDescriptionDraft(data.description ?? "");
+  }, [data]);
+
+  const applicationId = data?.interplanetary_flight_request_id;
+  const isDraft = data?.status === "draft";
+  const canEditDraft = Boolean(isDraft && !isModerator);
+  const busy = applicationMutationLoading || detailLoading;
+
+  const lineBusy = (planetId: number) =>
+    Boolean(itemMutationLoading[`line-${planetId}-${applicationId ?? 0}`]);
+  const rmBusy = (planetId: number) => Boolean(itemMutationLoading[`rm-${planetId}`]);
+
+  const handleSaveDescription = () => {
+    if (!applicationId || !canEditDraft || mockData) return;
+    void dispatch(
+      updateFlightRequestDraft({
+        applicationId,
+        body: { description: descriptionDraft || null },
+      }),
+    );
+  };
+
+  const handleSaveRow = (row: PlanetInRequestRowJSON) => {
+    if (!applicationId || !canEditDraft || mockData) return;
+    void dispatch(
+      updateFlightInRequestLine({
+        planetId: row.planet_id,
+        flightRequestId: applicationId,
+        body: {
+          quantity: row.quantity,
+          segment_order: row.segment_order,
+        },
+      }),
+    );
+  };
+
+  const handleRemoveRow = (planetId: number) => {
+    if (!applicationId || !canEditDraft || mockData) return;
+    if (!window.confirm("Убрать маршрут из заявки?")) return;
+    void dispatch(removeFlightInRequestLine({ planetId, flightRequestId: applicationId }));
+  };
+
+  const handleForm = () => {
+    if (!applicationId || !canEditDraft || mockData) return;
+    void dispatch(formFlightRequest(applicationId));
+  };
+
+  const handleDeleteApplication = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!applicationId || !canEditDraft) return;
+    if (!window.confirm("Удалить заявку?")) return;
+    if (mockData) {
+      navigate(ROUTES.PLANETS, { replace: true });
       return;
     }
-    let cancelled = false;
-    const run = async () => {
-      setLoading(true);
-      try {
-        const loaded = await getInterplanetaryFlightRequest(Number(id));
-        if (!cancelled) {
-          setData(loaded);
-          if (loaded) {
-            const dryDefault = defaultDryMassKg(loaded);
-            const next: Record<number, SegmentCalcParams> = {};
-            for (const row of loaded.flights_in_request) {
-              next[row.planet_id] = {
-                dryMassKg: dryDefault,
-                ispSec: DEFAULT_ISP_SEC,
-              };
-            }
-            setSegmentParams(next);
-          }
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  const updateSegmentParams = (planetId: number, patch: Partial<SegmentCalcParams>) => {
-    setSegmentParams((prev) => ({
-      ...prev,
-      [planetId]: {
-        dryMassKg: prev[planetId]?.dryMassKg ?? defaultDryMassKg(data),
-        ispSec: prev[planetId]?.ispSec ?? DEFAULT_ISP_SEC,
-        ...patch,
-      },
-    }));
+    void dispatch(deleteFlightRequest(applicationId)).then(() => {
+      navigate(ROUTES.PLANETS, { replace: true });
+    });
   };
 
-  const handleToolbarSearch = (e: FormEvent) => {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    navigate(q ? `/?${new URLSearchParams({ query: q }).toString()}` : "/");
-  };
+  if (!isAuthenticated) {
+    return null;
+  }
 
-  const handleDeleteMission = (e: FormEvent) => {
-    e.preventDefault();
-    if (!window.confirm("Удалить заявку?")) return;
-    navigate("/");
-  };
-
-  if (loading) {
+  if (detailLoading && !data) {
     return (
-      <div className="mission-basket-page mission-page-lab2">
-        <MissionLab2Header />
-        <BreadCrumbs />
-        <div className="system-load-detail">
-          <div className="planets-page__loading">
-            <Spinner animation="border" role="status" aria-label="Загрузка" />
-          </div>
+      <div className="mission-page">
+        <div className="planets-page__loading">
+          <Spinner animation="border" />
         </div>
       </div>
     );
   }
 
-  if (!data || !id) {
+  if (!data || applicationId == null) {
     return (
-      <div className="mission-basket-page mission-page-lab2">
-        <MissionLab2Header />
-        <BreadCrumbs />
-        <div className="system-load-detail">
-          <div className="planet-not-found">
-            <h1>Заявка не найдена</h1>
-          </div>
+      <div className="mission-page">
+        <div className="mission-not-found">
+          <h1>{detailError ? detailError : "Заявка не найдена."}</h1>
         </div>
       </div>
     );
   }
 
-  const sortedRows = [...data.flights_in_request].sort((a, b) => a.segment_order - b.segment_order);
-
-  const segmentFuelKg = (row: PlanetInRequestRowJSON) => {
-    const p = segmentParams[row.planet_id] ?? {
-      dryMassKg: defaultDryMassKg(data),
-      ispSec: DEFAULT_ISP_SEC,
-    };
-    return calculatePropellantKg(p.dryMassKg, row.delta_v_ms, p.ispSec);
-  };
+  const sortedRows = [...data.flights_in_request].sort(
+    (a, b) => a.segment_order - b.segment_order,
+  );
 
   return (
-    <div className="mission-basket-page mission-page-lab2">
-      <MissionLab2Header />
-      <BreadCrumbs />
-
-      <div className="toolbar">
-        <div className="toolbar-inner">
-          <form className="search-form" onSubmit={handleToolbarSearch}>
-            <input
-              type="text"
-              name="query"
-              className="search-input"
-              placeholder="Поиск маршрутов и планет"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Поиск маршрутов и планет"
-            />
-          </form>
-          <div className="toolbar-basket">
-            <Link to={`/mission/${id}`} className="system-load-icon" aria-label="Текущая заявка">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16v2H4V7zm2 4h12v2H6v-2zm3 4h6v2H9v-2z" fill="currentColor" />
-              </svg>
-              <span className="system-load-icon__badge">{data.route_count}</span>
-            </Link>
-          </div>
+    <div className="mission-page">
+      {busy ? (
+        <div className="mission-page__blocking" aria-live="polite">
+          <Spinner animation="border" size="sm" /> Обработка…
         </div>
-      </div>
-
-      <div className="system-load-detail">
+      ) : null}
+      <div className={`system-load-detail ${busy ? "mission-detail--blocked" : ""}`}>
         <div className="system-load-detail__header-card">
-          <div className="system-load-detail__header-top">
-            <div className="system-load-detail__header-main">
-              <h1 className="system-load-detail__title">Заявка № {id}</h1>
-              <p className="system-load-detail__description">{data.description}</p>
+          <h1 className="system-load-detail__title">{data.title}</h1>
+          <div className="system-load-detail__info">
+            <div className="system-load-detail__info-item">
+              <strong>ID заявки:</strong> {applicationId}
             </div>
-            <form onSubmit={handleDeleteMission} className="system-load-detail__delete-form">
+            <div className="system-load-detail__info-item">
+              <strong>Статус:</strong> {data.status}
+            </div>
+            <div className="system-load-detail__info-item">
+              <strong>Создатель:</strong> {data.creator_login || "—"}
+            </div>
+            <div className="system-load-detail__info-item">
+              <strong>Маршрутов в заявке:</strong> {data.flights_in_request.length}
+            </div>
+            <div className="system-load-detail__info-item">
+              <strong>Суммарное Δv (м/с):</strong> {Math.round(data.total_delta_v_ms)}
+            </div>
+            <div className="system-load-detail__info-item">
+              <strong>Суммарное топливо (кг):</strong>{" "}
+              {Math.round(data.total_fuel_mass_kg ?? 0)}
+            </div>
+          </div>
+          <Form.Group className="mission-page__description" controlId="mission-description">
+            <Form.Label>Описание заявки</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              value={descriptionDraft}
+              onChange={(e) => setDescriptionDraft(e.target.value)}
+              placeholder="Кратко опишите цель межпланетной миссии…"
+              disabled={!canEditDraft || Boolean(mockData)}
+            />
+          </Form.Group>
+          {canEditDraft && !mockData ? (
+            <div className="mission-page__method-actions">
               <button
-                type="submit"
-                className="system-load-detail__delete-icon"
-                title="Удалить заявку"
-                aria-label="Удалить заявку"
+                type="button"
+                className="mission-page__method-btn"
+                disabled={busy}
+                onClick={() => handleSaveDescription()}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="M9 3h6l1 2h5v2H3V5h5l1-2zm-1 6h2v10H8V9zm4 0h2v10h-2V9zm4 0h2v10h-2V9z"
-                    fill="currentColor"
-                  />
-                </svg>
+                Сохранить описание
               </button>
-            </form>
-          </div>
-        </div>
-
-        <div className="basket-segments">
-          <div className="basket-segments__head" aria-hidden="true">
-            <div className="basket-segments__cell basket-segments__cell--thumb">Фото</div>
-            <div className="basket-segments__cell">Маршрут</div>
-            <div className="basket-segments__cell">Откуда</div>
-            <div className="basket-segments__cell">Куда</div>
-            <div className="basket-segments__cell basket-segments__cell--num">Δv (м/с)</div>
-            <div className="basket-segments__cell basket-segments__cell--num basket-segments__cell--fuel">
-              Топливо (кг)
+              <button
+                type="button"
+                className="mission-page__method-btn mission-page__method-btn--accent"
+                disabled={busy}
+                onClick={() => handleForm()}
+              >
+                Сформировать заявку
+              </button>
             </div>
-          </div>
-
-          {sortedRows.map((row) => {
-            const params = segmentParams[row.planet_id] ?? {
-              dryMassKg: defaultDryMassKg(data),
-              ispSec: DEFAULT_ISP_SEC,
-            };
-            const fuelKg = segmentFuelKg(row);
-            const thumb = resolveMediaUrl(row.planet.image) || fallbackImageUrl();
-
-            return (
-              <article key={`${row.planet_id}-${row.segment_order}`} className="basket-segment">
-                <div className="basket-segment__row">
-                  <div className="basket-segments__cell basket-segments__cell--thumb">
-                    <img src={thumb} alt={row.planet.title} />
-                  </div>
-                  <div className="basket-segments__cell basket-segments__cell--strong">{row.planet.title}</div>
-                  <div className="basket-segments__cell">{row.planet.from}</div>
-                  <div className="basket-segments__cell">{row.planet.to}</div>
-                  <div className="basket-segments__cell basket-segments__cell--num basket-segments__cell--highlight">
-                    {Math.round(row.delta_v_ms)}
-                  </div>
-                  <div className="basket-segments__cell basket-segments__cell--num basket-segments__cell--fuel basket-segments__cell--highlight">
-                    {Math.round(fuelKg)}
-                  </div>
-                </div>
-                <div className="basket-segment__panel">
-                  <div className="basket-segment__form">
-                    <label className="basket-segment__field">
-                      <span className="basket-segment__field-name">Масса, кг</span>
-                      <input
-                        type="number"
-                        name="dry_mass_kg"
-                        step={1}
-                        className="basket-segment__input"
-                        value={params.dryMassKg}
-                        onChange={(e) =>
-                          updateSegmentParams(row.planet_id, {
-                            dryMassKg: Math.max(1, Number(e.target.value) || defaultDryMassKg(data)),
-                          })
-                        }
-                      />
-                    </label>
-                    <label className="basket-segment__field">
-                      <span className="basket-segment__field-name">Isp, с</span>
-                      <input
-                        type="number"
-                        name="isp_sec"
-                        step={1}
-                        className="basket-segment__input"
-                        value={params.ispSec}
-                        onChange={(e) =>
-                          updateSegmentParams(row.planet_id, {
-                            ispSec: Math.max(1, Number(e.target.value) || DEFAULT_ISP_SEC),
-                          })
-                        }
-                      />
-                    </label>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+          ) : null}
         </div>
+
+        <table className="load-table">
+          <thead>
+            <tr>
+              <th className="load-table__col-photo">Фото</th>
+              <th>Маршрут</th>
+              <th>Откуда</th>
+              <th>Куда</th>
+              <th>Δv (м/с)</th>
+              <th>Топливо (кг)</th>
+              {canEditDraft ? <th>Действия</th> : null}
+            </tr>
+          </thead>
+          <tbody>
+            {sortedRows.map((row) => {
+              const photo = resolveMediaUrl(row.planet.image) || fallbackImageUrl();
+              return (
+                <tr key={`${applicationId}-${row.planet_id}`}>
+                  <td className="load-table__col-photo">
+                    <img src={photo} alt={row.planet.title} />
+                  </td>
+                  <td>{row.planet.title}</td>
+                  <td>{row.planet.from}</td>
+                  <td>{row.planet.to}</td>
+                  <td>{Math.round(row.delta_v_ms)}</td>
+                  <td>{Math.round(row.propellant_kg)}</td>
+                  {canEditDraft ? (
+                    <td className="load-table__actions">
+                      <button
+                        type="button"
+                        className="mission-page__row-btn"
+                        disabled={busy || lineBusy(row.planet_id) || Boolean(mockData)}
+                        onClick={() => handleSaveRow(row)}
+                      >
+                        Сохранить перелёт
+                      </button>
+                      <button
+                        type="button"
+                        className="mission-page__row-btn mission-page__row-btn--danger"
+                        disabled={busy || rmBusy(row.planet_id) || Boolean(mockData)}
+                        onClick={() => handleRemoveRow(row.planet_id)}
+                      >
+                        Удалить из заявки
+                      </button>
+                    </td>
+                  ) : null}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        {canEditDraft ? (
+          <form className="mission-page__delete-form" onSubmit={handleDeleteApplication}>
+            <button
+              type="submit"
+              className="mission-page__delete-btn"
+              disabled={busy || Boolean(mockData)}
+            >
+              Удалить заявку
+            </button>
+          </form>
+        ) : null}
       </div>
     </div>
   );

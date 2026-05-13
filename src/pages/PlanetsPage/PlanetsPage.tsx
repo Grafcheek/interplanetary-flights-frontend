@@ -3,9 +3,11 @@ import { Alert } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
 import PlanetsList from "../../components/PlanetsList/PlanetsList";
 import PlanetFilterBar from "../../components/PlanetFilterBar/PlanetFilterBar";
+import CartRow from "../../components/CartRow/CartRow";
 import type { PlanetJSON } from "../../cosmosApi";
-import { getFlightCart, listPlanets, planetClipDescription } from "../../cosmosApi";
+import { planetClipDescription } from "../../cosmosApi";
 import { filterMockPlanetsByQuery, PLANETS_MOCK } from "../../modules/mock";
+import { listPlanetsAxios } from "../../modules/planetsApi";
 import { usePlanetImageSearch } from "../../hooks/usePlanetImageSearch";
 
 export default function PlanetsPage() {
@@ -13,6 +15,7 @@ export default function PlanetsPage() {
   const [clipSourcePlanets, setClipSourcePlanets] = useState<PlanetJSON[]>(PLANETS_MOCK);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [useMock, setUseMock] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [clipSessionActive, setClipSessionActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -20,12 +23,24 @@ export default function PlanetsPage() {
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      void getFlightCart();
-      const list = await listPlanets();
-      if (cancelled) return;
-      const resolvedList = list.length > 0 ? list : filterMockPlanetsByQuery("");
-      setPlanets(resolvedList);
-      setClipSourcePlanets(resolvedList);
+      try {
+        const list = await listPlanetsAxios();
+        if (cancelled) return;
+        if (list.length > 0) {
+          setPlanets(list);
+          setClipSourcePlanets(list);
+          setUseMock(false);
+        } else {
+          setPlanets(PLANETS_MOCK);
+          setClipSourcePlanets(PLANETS_MOCK);
+          setUseMock(true);
+        }
+      } catch {
+        if (cancelled) return;
+        setPlanets(PLANETS_MOCK);
+        setClipSourcePlanets(PLANETS_MOCK);
+        setUseMock(true);
+      }
     };
     void run();
     return () => {
@@ -34,12 +49,20 @@ export default function PlanetsPage() {
   }, []);
 
   const clipItems = useMemo(
-    () => clipSourcePlanets.map((p) => ({ id: p.planet_id, description: planetClipDescription(p) })),
+    () =>
+      clipSourcePlanets.map((p) => ({ id: p.planet_id, description: planetClipDescription(p) })),
     [clipSourcePlanets],
   );
 
-  const { items: clipProcessed, ready: clipReady, progress: clipProgress, imageEmbedding, workerError, searchByImage, resetSearch } =
-    usePlanetImageSearch(clipItems, clipSessionActive);
+  const {
+    items: clipProcessed,
+    ready: clipReady,
+    progress: clipProgress,
+    imageEmbedding,
+    workerError,
+    searchByImage,
+    resetSearch,
+  } = usePlanetImageSearch(clipItems, clipSessionActive);
 
   const planetById = useMemo(() => {
     const m = new Map<number, PlanetJSON>();
@@ -50,9 +73,23 @@ export default function PlanetsPage() {
   const handleSearch = async () => {
     setLoading(true);
     try {
-      const data = await listPlanets({ query });
-      setPlanets(data);
-      setClipSourcePlanets(data);
+      const data = await listPlanetsAxios({ query });
+      if (data.length > 0) {
+        setPlanets(data);
+        setClipSourcePlanets(data);
+        setUseMock(false);
+      } else if (useMock) {
+        const filtered = filterMockPlanetsByQuery(query);
+        setPlanets(filtered);
+        setClipSourcePlanets(filtered);
+      } else {
+        setPlanets([]);
+      }
+    } catch {
+      const filtered = filterMockPlanetsByQuery(query);
+      setPlanets(filtered);
+      setClipSourcePlanets(filtered);
+      setUseMock(true);
     } finally {
       setLoading(false);
     }
@@ -81,9 +118,14 @@ export default function PlanetsPage() {
   }, [clipReady, searchByImage, selectedImageFile]);
 
   const imageSearchActive = Boolean(imageEmbedding);
-  const visibleClipRows = imageSearchActive ? clipProcessed.filter((item) => item.isVisible) : [];
+  const visibleClipRows = useMemo(
+    () => (imageSearchActive ? clipProcessed.filter((item) => item.isVisible) : []),
+    [imageSearchActive, clipProcessed],
+  );
   const showClipProgress = clipSessionActive && clipItems.length > 0 && !clipReady && !workerError;
-  const clipButtonLabel = showClipProgress ? `Загрузка модели... ${clipProgress}%` : "Поиск по изображению";
+  const clipButtonLabel = showClipProgress
+    ? `Загрузка модели... ${clipProgress}%`
+    : "Поиск по изображению";
 
   const clipPlanets = useMemo(
     () =>
@@ -119,23 +161,14 @@ export default function PlanetsPage() {
             disableClipSearch={clipItems.length === 0 || showClipProgress}
             disableClipReset={!selectedImageFile && !imageSearchActive}
           />
-          <div className="toolbar-basket">
-            <div
-              className="interplanetary-flight-request-link interplanetary-flight-request-link--disabled"
-              aria-label="Заявка недоступна"
-              title="Заявка недоступна"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16v2H4V7zm2 4h12v2H6v-2zm3 4h6v2H9v-2z" fill="currentColor" />
-              </svg>
-              <span className="interplanetary-flight-request-link__badge">0</span>
-            </div>
-          </div>
+          <CartRow />
         </div>
       </div>
       <div className="space">
         <main className="planets-page__main">
-          {workerError ? <Alert variant="warning">Не удалось загрузить CLIP модель: {workerError}</Alert> : null}
+          {workerError ? (
+            <Alert variant="warning">Не удалось загрузить CLIP модель: {workerError}</Alert>
+          ) : null}
           {loading ? (
             <div className="planets-page__loading">
               <Spinner animation="border" role="status" aria-label="Загрузка">
@@ -158,7 +191,9 @@ export default function PlanetsPage() {
                 <PlanetsList planets={planets} />
               ) : (
                 <div className="planets-page__empty">
-                  {query.trim() ? `По запросу "${query}" ничего не найдено` : "Планеты не найдены"}
+                  {query.trim()
+                    ? `По запросу "${query}" ничего не найдено`
+                    : "Планеты не найдены"}
                 </div>
               )}
             </div>

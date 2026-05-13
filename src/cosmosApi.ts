@@ -80,6 +80,23 @@ function routeHint(titleRaw: string | undefined): string {
   return "Route type: Interplanetary transfer mission.";
 }
 
+export function planetVisualShortDescription(titleRaw: string | undefined): string {
+  const title = titleRaw?.toLowerCase().trim() ?? "";
+  if (title.includes("юпитер")) {
+    return "Striped planet Jupiter, large orange and beige sphere on a black background.";
+  }
+  if (title.includes("сатурн")) {
+    return "Brown ringed planet Saturn, round sphere with wide rings on a black background.";
+  }
+  if (title.includes("уран")) {
+    return "Light blue planet Uranus, smooth icy sphere on a black background.";
+  }
+  if (title.includes("нептун")) {
+    return "Deep blue planet Neptune, glowing round sphere on a black background.";
+  }
+  return "Round planet in dark space on a black background.";
+}
+
 export function planetClipDescription(planet: PlanetJSON): string {
   const hint = routeHint(planet.title);
   const en = planet.short_description_en?.trim();
@@ -90,183 +107,6 @@ export function planetClipDescription(planet: PlanetJSON): string {
   if (description) return `${hint} ${description}`;
   if (title) return `${hint} ${title}`;
   return hint;
-}
-
-export async function getFlightCart(): Promise<PlanetCartJSON> {
-  const { MOCK_CART } = await import("./modules/mock");
-  try {
-    const res = await fetch("/api/interplanetaryflightrequests/cart-icon", {
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw = (await res.json()) as { id?: number | null; count?: number };
-    return {
-      id: raw.id ?? null,
-      has_draft: (raw.id ?? null) !== null,
-      planets_count: raw.count ?? 0,
-    };
-  } catch {
-    return MOCK_CART;
-  }
-}
-
-type BackendRouteJSON = {
-  ID?: number;
-  id?: number;
-  Title?: string;
-  title?: string;
-  From?: string;
-  from_body?: string;
-  from?: string;
-  To?: string;
-  to_body?: string;
-  to?: string;
-  Description?: string;
-  description?: string;
-  Image?: string;
-  image_url?: string;
-  image?: string;
-  Video?: string;
-  video_url?: string;
-  video?: string;
-  FromOrbitKm?: number;
-  from_orbit_radius_km?: number;
-  ToOrbitKm?: number;
-  to_orbit_radius_km?: number;
-  ShortDescriptionEn?: string;
-  short_description_en?: string;
-};
-
-function kmToAu(km: number): number {
-  if (!Number.isFinite(km) || km <= 0) return 1;
-  return km / 149_597_870.7;
-}
-
-function adaptBackendRoute(raw: BackendRouteJSON): PlanetJSON {
-  const fromOrbitKm = raw.FromOrbitKm ?? raw.from_orbit_radius_km ?? 149_597_870.7;
-  const toOrbitKm = raw.ToOrbitKm ?? raw.to_orbit_radius_km ?? 149_597_870.7;
-  return {
-    planet_id: raw.ID ?? raw.id ?? 0,
-    title: raw.Title ?? raw.title ?? "Маршрут",
-    from: raw.From ?? raw.from_body ?? raw.from ?? "",
-    to: raw.To ?? raw.to_body ?? raw.to ?? "",
-    description: raw.Description ?? raw.description ?? "",
-    image: raw.Image ?? raw.image_url ?? raw.image ?? "",
-    video: raw.Video ?? raw.video_url ?? raw.video ?? "",
-    from_orbit_au: kmToAu(fromOrbitKm),
-    to_orbit_au: kmToAu(toOrbitKm),
-    launch_date: "",
-    price_credits: 0,
-    short_description_en: raw.ShortDescriptionEn ?? raw.short_description_en,
-  };
-}
-
-export async function listPlanets(params?: {
-  query?: string;
-}): Promise<PlanetJSON[]> {
-  const { filterMockPlanetsByQuery, PLANETS_MOCK } = await import("./modules/mock");
-  try {
-    let path = "/api/interplanetaryflights";
-    const q = new URLSearchParams();
-    if (params?.query?.trim()) q.append("query", params.query.trim());
-    if (q.size > 0) path += `?${q.toString()}`;
-    const res = await fetch(path, { headers: { Accept: "application/json" } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const payload = (await res.json()) as { items?: BackendRouteJSON[] } | BackendRouteJSON[];
-    const items = Array.isArray(payload) ? payload : (payload.items ?? []);
-    return items.map(adaptBackendRoute);
-  } catch {
-    const byQuery = filterMockPlanetsByQuery(params?.query ?? "");
-    return byQuery.length > 0 ? byQuery : PLANETS_MOCK;
-  }
-}
-
-export async function getPlanet(id: number): Promise<PlanetJSON | null> {
-  const { getMockPlanet } = await import("./modules/mock");
-  try {
-    const res = await fetch(`/api/interplanetaryflights/${id}`, {
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw = (await res.json()) as BackendRouteJSON;
-    return adaptBackendRoute(raw);
-  } catch {
-    return getMockPlanet(id) ?? null;
-  }
-}
-
-export async function getInterplanetaryFlightRequest(id: number): Promise<InterplanetaryFlightRequestDetailJSON | null> {
-  const { cloneInterplanetaryFlightDetail, MOCK_INTERPLANETARY_FLIGHT_DETAIL } = await import("./modules/mock");
-  try {
-    const res = await fetch(`/api/interplanetaryflightrequests/${id}`, {
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw = (await res.json()) as {
-      id: number;
-      spacecraft_dry_mass_kg: number;
-      total_fuel_mass_kg?: number | null;
-      items?: Array<{
-        route_id: number;
-        quantity: number;
-        segment_order: number;
-        is_primary: boolean;
-        delta_v_ms: number;
-        propellant_kg: number;
-        interplanetary_flight_title: string;
-        interplanetary_flight_from: string;
-        interplanetary_flight_to: string;
-        interplanetary_flight_description: string;
-        image_url: string;
-        video_url: string;
-        from_orbit_radius_km?: number;
-        to_orbit_radius_km?: number;
-      }>;
-    };
-
-    const items = raw.items ?? [];
-    const flights: PlanetInRequestRowJSON[] = items.map((it) => ({
-      planet_id: it.route_id,
-      segment_order: it.segment_order,
-      quantity: it.quantity,
-      is_primary: it.is_primary,
-      delta_v_ms: it.delta_v_ms,
-      propellant_kg: it.propellant_kg,
-      planet: {
-        planet_id: it.route_id,
-        title: it.interplanetary_flight_title,
-        from: it.interplanetary_flight_from,
-        to: it.interplanetary_flight_to,
-        description: it.interplanetary_flight_description,
-        image: it.image_url,
-        video: it.video_url,
-        from_orbit_au: kmToAu(it.from_orbit_radius_km ?? 149_597_870.7),
-        to_orbit_au: kmToAu(it.to_orbit_radius_km ?? 149_597_870.7),
-        launch_date: "",
-        price_credits: 0,
-      },
-    }));
-
-    const totalDelta = flights.reduce((sum, r) => sum + r.delta_v_ms, 0);
-    const totalFuel = flights.reduce((sum, r) => sum + r.propellant_kg, 0);
-
-    return {
-      interplanetary_flight_request_id: raw.id,
-      title: `Заявка № ${raw.id}`,
-      description: "Сформированная заявка на расчёт межпланетных перелётов.",
-      route_count: flights.length,
-      engine_mass_kg: 0,
-      spacecraft_dry_mass_kg: raw.spacecraft_dry_mass_kg,
-      total_delta_v_ms: totalDelta,
-      total_fuel_mass_kg: raw.total_fuel_mass_kg ?? totalFuel,
-      flights_in_request: flights,
-    };
-  } catch {
-    if (id === MOCK_INTERPLANETARY_FLIGHT_DETAIL.interplanetary_flight_request_id) {
-      return cloneInterplanetaryFlightDetail(MOCK_INTERPLANETARY_FLIGHT_DETAIL);
-    }
-    return null;
-  }
 }
 
 const AU_METERS = 149_597_870_700;

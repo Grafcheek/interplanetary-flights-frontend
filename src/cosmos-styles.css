@@ -1320,3 +1320,608 @@ a.card img {
         width: 100%;
     }
 }
+
+/* ===== Карточка планеты + кнопка «Добавить в заявку» ===== */
+
+.card-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-add-btn {
+    width: 100%;
+    height: 44px;
+    border: none;
+    border-radius: 0;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: "Public Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: #ffffff;
+    color: #000000;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.card-add-btn:hover:not(:disabled) {
+    background-color: #e0e0e0;
+}
+
+.card-add-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ===== Страницы входа/регистрации ===== */
+
+.auth-page--cosmos {
+    max-width: 440px;
+    margin: 32px auto;
+    padding: 0 20px 48px;
+}
+
+.auth-page--cosmos .auth-page__panel {
+    background: #0d0d10;
+    border: 1px solid #2e2e32;
+    border-radius: 0;
+    padding: 28px 32px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+}
+
+.auth-page--cosmos .auth-page__title {
+    margin: 0 0 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.auth-page--cosmos .auth-page__error {
+    background: rgba(175, 17, 8, 0.18);
+    border: 1px solid rgba(175, 17, 8, 0.55);
+    color: #ff8a8a;
+    padding: 10px 12px;
+    border-radius: 0;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.auth-page--cosmos .auth-page__form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.auth-page--cosmos .auth-page__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #c5c5c5;
+    margin-top: 8px;
+}
+
+.auth-page--cosmos .auth-page__input {
+    border: 1px solid #2e2e32;
+    border-radius: 0;
+    padding: 10px 12px;
+    font-size: 1rem;
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.auth-page--cosmos .auth-page__input:focus {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.auth-page--cosmos .auth-page__submit {
+    margin-top: 20px;
+    padding: 12px 16px;
+    border: 1px solid #ffffff;
+    border-radius: 0;
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.auth-page--cosmos .auth-page__submit:hover:not(:disabled) {
+    background-color: #e0e0e0;
+}
+
+.auth-page--cosmos .auth-page__submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.auth-page--cosmos .auth-page__footer {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #959599;
+}
+
+.auth-page--cosmos .auth-page__footer a {
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-page--cosmos .auth-page__footer a:hover {
+    color: #c5c5c5;
+    text-decoration: underline;
+}
+
+/* ===== Личный кабинет ===== */
+
+.profile-page {
+    padding: 24px 20px 48px;
+    color: #ffffff;
+}
+
+.profile-page__inner {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.profile-page__title {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.profile-page__alert {
+    background: rgba(46, 46, 50, 0.6) !important;
+    border: 1px solid #2e2e32 !important;
+    color: #c5c5c5 !important;
+    border-radius: 0 !important;
+}
+
+.profile-page__form .form-label {
+    color: #c5c5c5;
+}
+
+.profile-page__form .form-control {
+    background: #0d0d10;
+    border: 1px solid #2e2e32;
+    color: #ffffff;
+    border-radius: 0;
+}
+
+.profile-page__form .form-control:focus {
+    background: #0d0d10;
+    border-color: #ffffff;
+    color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.profile-page__jwt-preview {
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+}
+
+/* ===== Список заявок ===== */
+
+.missions-page {
+    padding: 0 20px 48px;
+    color: #ffffff;
+}
+
+.missions-page__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.missions-page__heading {
+    margin: 20px 0 8px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.missions-page__filters {
+    background: #0d0d10;
+    border: 1px solid #2e2e32;
+    border-radius: 0;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.missions-page__filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.missions-page__fg {
+    min-width: 160px;
+}
+
+.missions-page__fg--grow {
+    flex: 1;
+    min-width: 200px;
+}
+
+.missions-page__filters .form-label {
+    color: #c5c5c5;
+}
+
+.missions-page__filters .form-control,
+.missions-page__filters .form-select {
+    background: #000000;
+    border: 1px solid #2e2e32;
+    color: #ffffff;
+    border-radius: 0;
+}
+
+.missions-page__filters .form-control:focus,
+.missions-page__filters .form-select:focus {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.missions-page__apply {
+    margin-top: 16px;
+    font-weight: 700;
+    border: 1px solid #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-radius: 0 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.missions-page__apply:hover:not(:disabled) {
+    background-color: #e0e0e0 !important;
+    color: #000000 !important;
+}
+
+.missions-page__btn-finish {
+    border: 1px solid #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-weight: 700;
+    border-radius: 0 !important;
+}
+
+.missions-page__btn-reject {
+    border: 1px solid #af1108 !important;
+    color: #ff8a8a !important;
+    background-color: transparent !important;
+    font-weight: 700;
+    border-radius: 0 !important;
+}
+
+.missions-page__error {
+    color: #ff8a8a;
+    margin-bottom: 12px;
+}
+
+.missions-page__loader {
+    display: flex;
+    justify-content: center;
+    padding: 32px 0;
+}
+
+.missions-page__table-wrap {
+    overflow-x: auto;
+}
+
+.missions-page__table {
+    --bs-table-bg: #0d0d10;
+    --bs-table-color: #ffffff;
+    --bs-table-border-color: #2e2e32;
+    --bs-table-striped-bg: #131318;
+    --bs-table-striped-color: #ffffff;
+    --bs-table-hover-bg: #1a1a20;
+    --bs-table-hover-color: #ffffff;
+}
+
+.missions-page__linkish {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.missions-page__linkish:hover {
+    color: #c5c5c5;
+}
+
+.missions-page__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.missions-page__empty {
+    color: #c5c5c5;
+    margin-top: 16px;
+}
+
+/* ===== Страница заявки (mission detail) — методы и блокировка ===== */
+
+.mission-page {
+    position: relative;
+    color: #ffffff;
+}
+
+.mission-page__blocking {
+    position: fixed;
+    z-index: 2000;
+    inset: 0;
+    background: rgba(8, 12, 16, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.mission-detail--blocked {
+    pointer-events: none;
+    opacity: 0.72;
+}
+
+.mission-page__description {
+    margin-top: 16px;
+}
+
+.mission-page__description .form-label {
+    color: #c5c5c5;
+    font-size: 14px;
+}
+
+.mission-page__description textarea {
+    background-color: #0d0d10 !important;
+    border: 1px solid #2e2e32 !important;
+    color: #ffffff !important;
+    border-radius: 0;
+}
+
+.mission-page__description textarea:focus {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.mission-page__method-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.mission-page__method-btn {
+    border: 1px solid #2e2e32;
+    background: #0d0d10;
+    color: #ffffff;
+    border-radius: 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.mission-page__method-btn:hover:not(:disabled) {
+    border-color: #ffffff;
+    background-color: #1a1a20;
+}
+
+.mission-page__method-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mission-page__method-btn--accent {
+    border-color: #ffffff;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.mission-page__method-btn--accent:hover:not(:disabled) {
+    background-color: #e0e0e0;
+    color: #000000;
+}
+
+.mission-page__methods-hint {
+    color: #959599;
+    font-size: 13px;
+    margin: 12px 0 20px;
+    max-width: 960px;
+}
+
+.mission-page__row-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    border: 1px solid #2e2e32;
+    background: #0d0d10;
+    color: #ffffff;
+    border-radius: 0;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.mission-page__row-btn:last-child {
+    margin-bottom: 0;
+}
+
+.mission-page__row-btn:hover:not(:disabled) {
+    border-color: #ffffff;
+    background-color: #1a1a20;
+}
+
+.mission-page__row-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mission-page__row-btn--danger {
+    border-color: #af1108;
+    color: #ff8a8a;
+}
+
+.mission-page__delete-form {
+    margin-top: 24px;
+}
+
+.mission-page__delete-btn {
+    height: 44px;
+    padding: 0 22px;
+    border: 1px solid #af1108;
+    background-color: transparent;
+    color: #ff8a8a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 0;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.mission-page__delete-btn:hover:not(:disabled) {
+    background-color: rgba(175, 17, 8, 0.18);
+}
+
+.mission-page__delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mission-not-found {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 20px;
+    color: #c5c5c5;
+}
+
+.mission-not-found h1 {
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+
+/* ===== Таблица позиций заявки (м-м) ===== */
+
+.mission-page .system-load-detail {
+    padding: 24px 20px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.mission-page .system-load-detail__header-card {
+    background: #0d0d10;
+    border: 1px solid #2e2e32;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.mission-page .system-load-detail__title {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.mission-page .system-load-detail__info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 12px;
+    color: #c5c5c5;
+}
+
+.mission-page .system-load-detail__info-item strong {
+    color: #ffffff;
+}
+
+.load-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #ffffff;
+}
+
+.load-table thead th {
+    text-align: left;
+    font-weight: 700;
+    color: #ffffff;
+    padding: 12px;
+    border-bottom: 1px solid #2e2e32;
+    background-color: #000000;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.load-table tbody tr {
+    background-color: #0d0d10;
+    transition: background-color 0.2s ease;
+}
+
+.load-table tbody tr:nth-child(even) {
+    background-color: #131318;
+}
+
+.load-table tbody tr:hover {
+    background-color: #1a1a20;
+}
+
+.load-table tbody td {
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #2e2e32;
+    vertical-align: middle;
+    color: #ffffff;
+}
+
+.load-table__col-photo {
+    width: 80px;
+}
+
+.load-table__col-photo img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    display: block;
+    background: #000000;
+}
+
+.load-table__input {
+    max-width: 100px;
+    background-color: #000000 !important;
+    border: 1px solid #2e2e32 !important;
+    color: #ffffff !important;
+    border-radius: 0 !important;
+    font-size: 14px;
+}
+
+.load-table__input:focus {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+.load-table__actions {
+    vertical-align: top;
+    min-width: 220px;
+}
