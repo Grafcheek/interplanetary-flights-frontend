@@ -1944,3 +1944,77 @@ a.card img {
     gap: 8px;
     vertical-align: middle;
 }
+
+/* ===== Tauri: гостевой интерфейс ===== */
+
+.guest-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 8px;
+}
+
+.guest-header__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: "Public Sans", system-ui, sans-serif;
+    font-size: 15px;
+}
+
+.guest-header__nav a {
+    color: #ffffff;
+}
+
+.guest-info-page {
+    max-width: 720px;
+    margin: 32px auto;
+    padding: 0 20px 48px;
+}
+
+.guest-info-page__panel {
+    background: #0d0d10;
+    border: 1px solid #2e2e32;
+    padding: 28px 32px;
+    color: #ffffff;
+}
+
+.guest-info-page__panel h1 {
+    margin: 0 0 16px;
+    font-size: 1.5rem;
+}
+
+.guest-info-page__panel p {
+    margin: 0 0 12px;
+    color: #c5c5c5;
+    line-height: 1.55;
+}
+
+.guest-info-page__hint {
+    font-size: 0.92rem;
+}
+
+@media (max-width: 560px) {
+    .guest-header__inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-bottom: 8px;
+    }
+
+    .toolbar-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .planet-filter-toolbar__fields {
+        width: 100%;
+    }
+
+    .search-input {
+        width: 100%;
+        flex: 1;
+    }
+}

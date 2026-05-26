@@ -11,6 +11,7 @@ interface PlanetFilterBarProps {
   clipButtonLabel: string;
   disableClipSearch?: boolean;
   disableClipReset?: boolean;
+  showImageSearch?: boolean;
 }
 
 export default function PlanetFilterBar({
@@ -22,6 +23,7 @@ export default function PlanetFilterBar({
   clipButtonLabel,
   disableClipSearch = false,
   disableClipReset = false,
+  showImageSearch = true,
 }: PlanetFilterBarProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -42,22 +44,26 @@ export default function PlanetFilterBar({
       <Button type="submit" className="search-btn">
         Найти
       </Button>
-      <Button
-        type="button"
-        className="search-btn"
-        onClick={onImageUploadClick}
-        disabled={disableClipSearch}
-      >
-        {clipButtonLabel}
-      </Button>
-      <Button
-        type="button"
-        className="search-btn search-btn--ghost"
-        onClick={onClearImage}
-        disabled={disableClipReset}
-      >
-        Сбросить фото
-      </Button>
+      {showImageSearch ? (
+        <>
+          <Button
+            type="button"
+            className="search-btn"
+            onClick={onImageUploadClick}
+            disabled={disableClipSearch}
+          >
+            {clipButtonLabel}
+          </Button>
+          <Button
+            type="button"
+            className="search-btn search-btn--ghost"
+            onClick={onClearImage}
+            disabled={disableClipReset}
+          >
+            Сбросить фото
+          </Button>
+        </>
+      ) : null}
     </Form>
   );
 }

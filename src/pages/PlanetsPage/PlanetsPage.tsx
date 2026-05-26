@@ -9,44 +9,60 @@ import { planetClipDescription } from "../../cosmosApi";
 import { filterMockPlanetsByQuery, PLANETS_MOCK } from "../../modules/mock";
 import { listPlanetsAxios } from "../../modules/planetsApi";
 import { usePlanetImageSearch } from "../../hooks/usePlanetImageSearch";
+import { isGuestMode } from "../../config/appMode";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { applyQuery, setQuery } from "../../store/slices/planetFilterSlice";
 
 export default function PlanetsPage() {
   const [planets, setPlanets] = useState<PlanetJSON[]>(PLANETS_MOCK);
   const [clipSourcePlanets, setClipSourcePlanets] = useState<PlanetJSON[]>(PLANETS_MOCK);
-  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [useMock, setUseMock] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [clipSessionActive, setClipSessionActive] = useState(false);
+  const [clipSessionActiveState, setClipSessionActive] = useState(false);
+  const clipSessionActive = !isGuestMode && clipSessionActiveState;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useAppDispatch();
+  const query = useAppSelector((state) => state.planetFilter.query);
+  const appliedQuery = useAppSelector((state) => state.planetFilter.appliedQuery);
+
+  const loadPlanets = async (queryText: string) => {
+    const normalized = queryText.trim();
+    const data = await listPlanetsAxios(normalized ? { query: normalized } : undefined);
+
+    if (data.length > 0) {
+      setPlanets(data);
+      setClipSourcePlanets(data);
+      return;
+    }
+
+    if (normalized) {
+      const filtered = filterMockPlanetsByQuery(normalized);
+      setPlanets(filtered);
+      setClipSourcePlanets(filtered);
+      return;
+    }
+
+    setPlanets(PLANETS_MOCK);
+    setClipSourcePlanets(PLANETS_MOCK);
+  };
 
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
       try {
-        const list = await listPlanetsAxios();
+        await loadPlanets(appliedQuery);
         if (cancelled) return;
-        if (list.length > 0) {
-          setPlanets(list);
-          setClipSourcePlanets(list);
-          setUseMock(false);
-        } else {
-          setPlanets(PLANETS_MOCK);
-          setClipSourcePlanets(PLANETS_MOCK);
-          setUseMock(true);
-        }
       } catch {
         if (cancelled) return;
         setPlanets(PLANETS_MOCK);
         setClipSourcePlanets(PLANETS_MOCK);
-        setUseMock(true);
       }
     };
     void run();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [appliedQuery]);
 
   const clipItems = useMemo(
     () =>
@@ -71,25 +87,14 @@ export default function PlanetsPage() {
   }, [clipSourcePlanets]);
 
   const handleSearch = async () => {
+    dispatch(applyQuery());
     setLoading(true);
     try {
-      const data = await listPlanetsAxios({ query });
-      if (data.length > 0) {
-        setPlanets(data);
-        setClipSourcePlanets(data);
-        setUseMock(false);
-      } else if (useMock) {
-        const filtered = filterMockPlanetsByQuery(query);
-        setPlanets(filtered);
-        setClipSourcePlanets(filtered);
-      } else {
-        setPlanets([]);
-      }
+      await loadPlanets(query);
     } catch {
       const filtered = filterMockPlanetsByQuery(query);
       setPlanets(filtered);
       setClipSourcePlanets(filtered);
-      setUseMock(true);
     } finally {
       setLoading(false);
     }
@@ -144,24 +149,27 @@ export default function PlanetsPage() {
     <div className="planets-page">
       <div className="toolbar">
         <div className="toolbar-inner">
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            className="clip-search-section__file-input"
-            onChange={handleImageUpload}
-          />
+          {!isGuestMode ? (
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              className="clip-search-section__file-input"
+              onChange={handleImageUpload}
+            />
+          ) : null}
           <PlanetFilterBar
             query={query}
-            onQueryChange={setQuery}
+            onQueryChange={(value) => dispatch(setQuery(value))}
             onSearch={handleSearch}
             onImageUploadClick={handleUploadButtonClick}
             onClearImage={handleClearImage}
             clipButtonLabel={clipButtonLabel}
             disableClipSearch={clipItems.length === 0 || showClipProgress}
             disableClipReset={!selectedImageFile && !imageSearchActive}
+            showImageSearch={!isGuestMode}
           />
-          <CartRow />
+          {!isGuestMode ? <CartRow /> : null}
         </div>
       </div>
       <div className="space">
