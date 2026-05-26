@@ -31,24 +31,26 @@ export default function PlanetFilterBar({
   };
 
   return (
-    <Form onSubmit={handleSubmit} className="planet-filter-toolbar__fields search-form">
-      <Form.Control
-        type="text"
-        name="query"
-        className="search-input"
-        placeholder="Поиск маршрутов и планет"
-        value={query}
-        onChange={(e) => onQueryChange(e.target.value)}
-        aria-label="Поиск по названию и маршруту"
-      />
-      <Button type="submit" className="search-btn">
-        Найти
-      </Button>
+    <Form onSubmit={handleSubmit} className="planet-filter-toolbar__fields">
+      <div className="planet-filter-toolbar__row planet-filter-toolbar__row--text">
+        <Form.Control
+          type="text"
+          name="query"
+          className="search-input planet-filter-toolbar__input"
+          placeholder="Поиск маршрутов и планет"
+          value={query}
+          onChange={(e) => onQueryChange(e.target.value)}
+          aria-label="Поиск по названию и маршруту"
+        />
+        <Button type="submit" className="search-btn planet-filter-toolbar__submit">
+          Найти
+        </Button>
+      </div>
       {showImageSearch ? (
-        <>
+        <div className="planet-filter-toolbar__row planet-filter-toolbar__row--image">
           <Button
             type="button"
-            className="search-btn"
+            className="search-btn planet-filter-toolbar__image-btn"
             onClick={onImageUploadClick}
             disabled={disableClipSearch}
           >
@@ -56,13 +58,13 @@ export default function PlanetFilterBar({
           </Button>
           <Button
             type="button"
-            className="search-btn search-btn--ghost"
+            className="search-btn search-btn--ghost planet-filter-toolbar__image-btn"
             onClick={onClearImage}
             disabled={disableClipReset}
           >
             Сбросить фото
           </Button>
-        </>
+        </div>
       ) : null}
     </Form>
   );

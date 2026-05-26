@@ -936,11 +936,39 @@ a.card img {
 
 .planet-filter-toolbar__fields {
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
     flex: 1;
     min-width: 0;
+}
+
+.planet-filter-toolbar__row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+}
+
+.planet-filter-toolbar__row--text .planet-filter-toolbar__input {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+}
+
+.planet-filter-toolbar__row--text .planet-filter-toolbar__submit {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.planet-filter-toolbar__row--image .planet-filter-toolbar__image-btn {
+    flex: 1;
+    min-width: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    white-space: normal;
+    line-height: 1.2;
 }
 
 .planets-page__main {
@@ -2013,8 +2041,7 @@ a.card img {
         width: 100%;
     }
 
-    .search-input {
-        width: 100%;
-        flex: 1;
+    .planet-filter-toolbar__row--image .planet-filter-toolbar__image-btn {
+        font-size: 11px;
     }
 }
