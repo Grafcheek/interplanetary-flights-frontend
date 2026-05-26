@@ -1,0 +1,84 @@
+.cosmos-navbar {
+  background: #000000 !important;
+  border-bottom: 1px solid #2e2e32;
+}
+
+.cosmos-navbar__inner {
+  align-items: center;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.cosmos-navbar__brand .header-home__icon {
+  width: 60px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.cosmos-navbar__nav {
+  gap: 4px;
+}
+
+@media (min-width: 992px) {
+  .cosmos-navbar__nav {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.cosmos-navbar__toggle {
+  border-color: #2e2e32;
+  padding: 6px 10px;
+}
+
+.cosmos-navbar__toggle:focus {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.cosmos-navbar .navbar-toggler-icon {
+  filter: invert(1);
+  opacity: 0.9;
+}
+
+.cosmos-navbar .navbar-collapse.show,
+.cosmos-navbar .navbar-collapse.collapsing {
+  margin-top: 8px;
+  padding-bottom: 8px;
+  border-top: 1px solid #2e2e32;
+}
+
+@media (min-width: 992px) {
+  .cosmos-navbar .navbar-collapse.show,
+  .cosmos-navbar .navbar-collapse.collapsing {
+    margin-top: 0;
+    padding-bottom: 0;
+    border-top: none;
+  }
+}
+
+.cosmos-nav-link {
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+.cosmos-nav-link:hover,
+.cosmos-nav-link:focus {
+  color: #c5c5c5 !important;
+}
+
+.cosmos-nav-link--muted,
+.cosmos-nav-link:disabled {
+  color: #6b6b70 !important;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.cosmos-navbar__username {
+  color: #c5c5c5;
+  font-size: 13px;
+  font-weight: 600;
+  padding-left: 8px;
+}
