@@ -4,29 +4,19 @@
 
 ---
 
-## 1. Запушить код на GitHub (обязательно)
+## 1. Код на GitHub — уже залит
 
-Репозиторий: https://github.com/Grafcheek/interplanetary-flights-frontend
+Репозиторий: https://github.com/Grafcheek/interplanetary-flights-frontend  
+Ветки: `main` и `lab8-adaptive-pwa-tauri-deploy` (обе с полным фронтом).
 
-В PowerShell:
+Если будете править код дальше:
 
 ```powershell
 cd C:\Users\admin\OneDrive\Desktop\Education\RIP_space_2026\labs_5-8\interplanetary-flights-frontend
-
-# если коммит ещё не сделан агентом — сделайте сами:
 & "D:\Programs\Git\cmd\git.exe" add -A
-& "D:\Programs\Git\cmd\git.exe" commit -m "lab8: Redux filter, PWA, adaptive, Tauri guest, GitHub Pages"
-
-# ветка lab8 → GitHub
-& "D:\Programs\Git\cmd\git.exe" push -u origin lab8-adaptive-pwa-tauri-deploy
-
-# для GitHub Pages удобнее слить в main:
-& "D:\Programs\Git\cmd\git.exe" checkout main
-& "D:\Programs\Git\cmd\git.exe" merge lab8-adaptive-pwa-tauri-deploy
+& "D:\Programs\Git\cmd\git.exe" commit -m "описание изменений"
 & "D:\Programs\Git\cmd\git.exe" push origin main
 ```
-
-При запросе логина GitHub используйте **Personal Access Token** вместо пароля.
 
 ---
 
