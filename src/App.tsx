@@ -76,7 +76,11 @@ function FullRoutes() {
 }
 
 function App() {
-  return <BrowserRouter>{isGuestMode ? <GuestRoutes /> : <FullRoutes />}</BrowserRouter>;
+  return (
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      {isGuestMode ? <GuestRoutes /> : <FullRoutes />}
+    </BrowserRouter>
+  );
 }
 
 export default App;
