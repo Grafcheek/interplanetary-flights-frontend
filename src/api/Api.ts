@@ -21,17 +21,26 @@ export interface WebBackendInternalAppSerializerPlanetJSON {
 }
 
 export interface WebBackendInternalAppSerializerInterplanetaryFlightRequestJSON {
+  /** ID в ответе списка (бэкенд: `id`). */
+  id?: number;
   interplanetary_flight_request_id?: number;
   status?: string;
   created_at?: string;
   creator_login?: string;
   moderator_login?: string | null;
+  /** Дата формирования: в списке — `formed_at`, в swagger — `forming_date`. */
+  formed_at?: string | null;
   forming_date?: string | null;
+  /** Дата завершения: в списке — `completed_at`, в swagger — `finish_date`. */
+  completed_at?: string | null;
   finish_date?: string | null;
   description?: string | null;
+  theme?: string | null;
   spacecraft_dry_mass_kg?: number;
   total_fuel_mass_kg?: number | null;
   route_count?: number;
+  routes_count?: number;
+  segments_with_result?: number;
 }
 
 export interface WebBackendInternalAppSerializerFlightInRequestJSON {

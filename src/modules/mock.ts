@@ -130,6 +130,8 @@ function rowForPlanetId(id: number, order: number, qty: number, primary: boolean
     is_primary: primary,
     delta_v_ms: dv,
     propellant_kg: prop,
+    segment_dry_mass_kg: DRY_KG,
+    segment_isp_sec: ISP_S,
     planet,
   };
 }

@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { registerUser } from "../../store/slices/userSlice";
+import { authLoginRequest, authRegisterRequest } from "../../modules/authApi";
+import { apiErrMessage } from "../../store/utils/apiError";
+import {
+  setAuthenticatedUser,
+  setUserError,
+  setUserLoading,
+} from "../../store/slices/userSlice";
 import { fetchFlightRequestCart } from "../../store/slices/flightRequestSlice";
 import { ROUTES } from "../../routePaths";
 
@@ -19,12 +25,24 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password !== form.password2) return;
+    dispatch(setUserLoading(true));
+    dispatch(setUserError(null));
     try {
-      await dispatch(registerUser({ login: form.login, password: form.password })).unwrap();
+      await authRegisterRequest({ username: form.login, password: form.password });
+      const response = await authLoginRequest({
+        username: form.login,
+        password: form.password,
+      });
+      const token = response.data?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+      dispatch(setAuthenticatedUser({ username: form.login }));
       void dispatch(fetchFlightRequestCart());
       navigate(ROUTES.PLANETS, { replace: true });
-    } catch {
-      void 0;
+    } catch (err) {
+      dispatch(setUserLoading(false));
+      dispatch(setUserError(apiErrMessage(err)));
     }
   };
 

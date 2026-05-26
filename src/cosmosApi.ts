@@ -20,6 +20,8 @@ export interface PlanetInRequestRowJSON {
   is_primary: boolean;
   delta_v_ms: number;
   propellant_kg: number;
+  segment_dry_mass_kg?: number;
+  segment_isp_sec?: number;
   planet: PlanetJSON;
 }
 

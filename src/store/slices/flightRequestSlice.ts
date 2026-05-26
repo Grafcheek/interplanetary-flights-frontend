@@ -12,7 +12,7 @@ import type {
 } from "../../cosmosApi";
 import { planetVisualShortDescription } from "../../cosmosApi";
 import { apiErrMessage } from "../utils/apiError";
-import { logoutUser } from "./userSlice";
+import { clearSession } from "./userSlice";
 
 const AU_KM = 149_597_870.7;
 
@@ -42,18 +42,21 @@ function mapPlanet(p: WebBackendInternalAppSerializerPlanetJSON): PlanetJSON {
 function mapFlightRequestRow(
   fr: WebBackendInternalAppSerializerInterplanetaryFlightRequestJSON,
 ): FlightRequestListRow {
+  const requestId = Number(fr.interplanetary_flight_request_id ?? fr.id ?? 0);
   return {
-    interplanetary_flight_request_id: Number(fr.interplanetary_flight_request_id ?? 0),
+    interplanetary_flight_request_id: requestId,
     status: fr.status ?? "",
     created_at: fr.created_at != null ? String(fr.created_at) : "",
     creator_login: fr.creator_login ?? "",
     moderator_login: fr.moderator_login ?? null,
-    forming_date: fr.forming_date ?? null,
-    finish_date: fr.finish_date ?? null,
-    description: fr.description ?? null,
+    forming_date: fr.forming_date ?? fr.formed_at ?? null,
+    finish_date: fr.finish_date ?? fr.completed_at ?? null,
+    description: fr.description ?? fr.theme ?? null,
+    theme: fr.theme ?? fr.description ?? null,
     spacecraft_dry_mass_kg: Number(fr.spacecraft_dry_mass_kg ?? 0),
     total_fuel_mass_kg: fr.total_fuel_mass_kg ?? null,
-    route_count: Number(fr.route_count ?? 0),
+    route_count: Number(fr.routes_count ?? fr.route_count ?? 0),
+    segments_with_result: Number(fr.segments_with_result ?? 0),
   };
 }
 
@@ -66,9 +69,11 @@ export interface FlightRequestListRow {
   forming_date: string | null;
   finish_date: string | null;
   description: string | null;
+  theme: string | null;
   spacecraft_dry_mass_kg: number;
   total_fuel_mass_kg: number | null;
   route_count: number;
+  segments_with_result: number;
 }
 
 export interface FlightRequestDetail extends InterplanetaryFlightRequestDetailJSON {
@@ -97,6 +102,8 @@ type BackendDetailItem = {
   from_orbit_radius_km?: number;
   to_orbit_radius_km?: number;
   short_description_en?: string;
+  segment_dry_mass_kg?: number;
+  segment_isp_sec?: number;
   planet?: WebBackendInternalAppSerializerPlanetJSON;
 };
 
@@ -127,6 +134,9 @@ function rowFromBackend(it: BackendDetailItem): PlanetInRequestRowJSON {
     is_primary: Boolean(it.is_primary),
     delta_v_ms: Number(it.delta_v_ms ?? 0),
     propellant_kg: Number(it.propellant_kg ?? 0),
+    segment_dry_mass_kg:
+      it.segment_dry_mass_kg != null ? Number(it.segment_dry_mass_kg) : undefined,
+    segment_isp_sec: it.segment_isp_sec != null ? Number(it.segment_isp_sec) : undefined,
     planet,
   };
 }
@@ -149,8 +159,8 @@ function asDetail(data: unknown): FlightRequestDetail | null {
   );
   return {
     interplanetary_flight_request_id: id,
-    title: `Заявка № ${id}`,
-    description: headerRaw.description ?? "",
+    title: "Заявка на расчёт",
+    description: headerRaw.description ?? headerRaw.theme ?? "",
     route_count: flights.length,
     engine_mass_kg: 0,
     spacecraft_dry_mass_kg: Number(headerRaw.spacecraft_dry_mass_kg ?? 0),
@@ -448,8 +458,7 @@ const flightRequestSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(logoutUser.fulfilled, () => buildInitialState())
-      .addCase(logoutUser.rejected, () => buildInitialState())
+      .addCase(clearSession, () => buildInitialState())
       .addCase(fetchFlightRequestCart.pending, (state) => {
         state.cartLoading = true;
       })

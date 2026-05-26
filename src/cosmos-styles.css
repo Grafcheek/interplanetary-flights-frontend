@@ -1600,6 +1600,17 @@ a.card img {
     border-radius: 0 !important;
 }
 
+.missions-page__theme {
+    max-width: 280px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.missions-page__num {
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
 .missions-page__error {
     color: #ff8a8a;
     margin-bottom: 12px;
@@ -1746,9 +1757,10 @@ a.card img {
 }
 
 .mission-page__row-btn {
-    display: block;
-    width: 100%;
-    margin-bottom: 8px;
+    display: inline-block;
+    width: auto;
+    margin-bottom: 0;
+    flex-shrink: 0;
     border: 1px solid #2e2e32;
     background: #0d0d10;
     color: #ffffff;
@@ -1758,10 +1770,7 @@ a.card img {
     font-weight: 700;
     cursor: pointer;
     text-transform: uppercase;
-}
-
-.mission-page__row-btn:last-child {
-    margin-bottom: 0;
+    white-space: nowrap;
 }
 
 .mission-page__row-btn:hover:not(:disabled) {
@@ -1922,6 +1931,16 @@ a.card img {
 }
 
 .load-table__actions {
-    vertical-align: top;
-    min-width: 220px;
+    vertical-align: middle;
+    min-width: 280px;
+    white-space: nowrap;
+}
+
+.load-table__actions-inner {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    vertical-align: middle;
 }

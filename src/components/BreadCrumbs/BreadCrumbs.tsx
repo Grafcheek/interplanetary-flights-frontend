@@ -68,7 +68,7 @@ export default function BreadCrumbs() {
     if (flightMatch?.params.id) {
       return [
         { label: "Главная", to: ROUTES.PLANETS },
-        { label: `Заявка № ${flightMatch.params.id}` },
+        { label: "Заявка на расчёт" },
       ];
     }
 

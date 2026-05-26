@@ -48,6 +48,9 @@ type BackendPlanetJSON = {
   short_description_en?: string;
 };
 
+/** Демонстрационный alias для защиты: «услуги» как strategy JSON. */
+export type ShardingStrategyJSON = PlanetJSON;
+
 function kmToAu(km: number): number {
   if (!Number.isFinite(km) || km <= 0) return 1;
   return km / 149_597_870.7;
@@ -99,5 +102,26 @@ export async function getPlanetAxios(id: number): Promise<PlanetJSON | null> {
     return r.data ? adaptBackendPlanet(r.data) : null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Демонстрационный кусок в стиле методички:
+ * запрос услуг (strategies) напрямую через axios, без codegen и thunk.
+ */
+export async function listStrategies(params?: { title?: string }): Promise<ShardingStrategyJSON[]> {
+  try {
+    const r = await planetsAxios.get<{ items?: BackendPlanetJSON[] } | BackendPlanetJSON[]>(
+      "/interplanetaryflights",
+      {
+        params: params?.title ? { Title: params.title } : undefined,
+        headers: { Accept: "application/json" },
+      },
+    );
+    const payload = r.data;
+    const items = Array.isArray(payload) ? payload : (payload.items ?? []);
+    return items.map(adaptBackendPlanet);
+  } catch {
+    return [];
   }
 }

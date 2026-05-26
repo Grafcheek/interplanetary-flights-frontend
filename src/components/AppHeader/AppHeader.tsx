@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
+import { authLogoutRequest } from "../../modules/authApi";
+import { apiErrMessage } from "../../store/utils/apiError";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { logoutUser } from "../../store/slices/userSlice";
+import { clearSession, setUserError } from "../../store/slices/userSlice";
 import { interplanetaryFlightPath, ROUTES } from "../../routePaths";
 import "./AppHeader.css";
 
@@ -12,8 +14,15 @@ export default function AppHeader() {
   const { isAuthenticated, username } = useAppSelector((s) => s.user);
   const cart = useAppSelector((s) => s.flightRequest.cart);
 
-  const handleLogout = () => {
-    void dispatch(logoutUser());
+  const handleLogout = async () => {
+    try {
+      await authLogoutRequest();
+    } catch (err) {
+      dispatch(setUserError(apiErrMessage(err)));
+    } finally {
+      localStorage.removeItem("token");
+      dispatch(clearSession());
+    }
   };
 
   const draftActive =

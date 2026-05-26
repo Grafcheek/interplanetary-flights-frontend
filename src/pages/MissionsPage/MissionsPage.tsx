@@ -53,9 +53,9 @@ export default function MissionsPage() {
   }, [isAuthenticated, navigate, load]);
 
   const visible = useMemo(() => {
-    const q = creatorFilter.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter((a) => (a.creator_login ?? "").toLowerCase().includes(q));
+    const creatorQ = creatorFilter.trim().toLowerCase();
+    if (!creatorQ) return list;
+    return list.filter((a) => (a.creator_login ?? "").toLowerCase().includes(creatorQ));
   }, [list, creatorFilter]);
 
   const handleApplyFilters = () => {
@@ -145,6 +145,8 @@ export default function MissionsPage() {
                 <th>ID</th>
                 <th>Статус</th>
                 <th>Создатель</th>
+                <th>Кол-во планет</th>
+                <th>Тема</th>
                 <th>Создана</th>
                 <th>Формирование</th>
                 <th>Завершение</th>
@@ -157,6 +159,7 @@ export default function MissionsPage() {
                 const id = row.interplanetary_flight_request_id;
                 const finKey = `finish-${id}`;
                 const finBusy = Boolean(itemMutationLoading[finKey]);
+                if (!id) return null;
                 return (
                   <tr key={id}>
                     <td>
@@ -170,6 +173,10 @@ export default function MissionsPage() {
                     </td>
                     <td>{statusLabel(row.status)}</td>
                     <td>{row.creator_login ?? "—"}</td>
+                    <td className="missions-page__num">{row.route_count}</td>
+                    <td className="missions-page__theme">
+                      {row.theme?.trim() || row.description?.trim() || "—"}
+                    </td>
                     <td>
                       {row.created_at
                         ? new Date(row.created_at).toLocaleString("ru-RU")
