@@ -7,6 +7,7 @@ import { apiErrMessage } from "../../store/utils/apiError";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { clearSession, setUserError } from "../../store/slices/userSlice";
 import { interplanetaryFlightPath, ROUTES } from "../../routePaths";
+import { publicUrl } from "../../utils/publicUrl";
 import "./AppHeader.css";
 
 export default function AppHeader() {
@@ -38,7 +39,7 @@ export default function AppHeader() {
     >
       <Container fluid className="cosmos-navbar-inner cosmos-navbar__inner px-3">
         <Navbar.Brand as={Link} to={ROUTES.PLANETS} className="header-home cosmos-navbar__brand mb-0 py-2">
-          <img src="/logo.png" alt="Cosmos" className="header-home__icon" />
+          <img src={publicUrl("/logo.png")} alt="Cosmos" className="header-home__icon" />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="cosmos-main-nav" className="cosmos-navbar__toggle" />
         <Navbar.Collapse id="cosmos-main-nav" className="justify-content-end">

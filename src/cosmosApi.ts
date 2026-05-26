@@ -50,20 +50,19 @@ function minioBase(): string {
   return raw?.replace(/\/$/, "") ?? "http://localhost:9000";
 }
 
+import { publicUrl } from "./utils/publicUrl";
+
 export function fallbackImageUrl(): string {
-  return "/mock/Earth.jpg";
+  return publicUrl("/mock/Earth.jpg");
 }
 
 export function resolveMediaUrl(key: string): string {
   if (!key?.trim()) return fallbackImageUrl();
-  if (
-    key.startsWith("http://") ||
-    key.startsWith("https://") ||
-    key.startsWith("/") ||
-    key.startsWith("blob:") ||
-    key.startsWith("data:")
-  ) {
+  if (key.startsWith("http://") || key.startsWith("https://") || key.startsWith("blob:") || key.startsWith("data:")) {
     return key;
+  }
+  if (key.startsWith("/")) {
+    return publicUrl(key);
   }
   const base = minioBase();
   if (base) {

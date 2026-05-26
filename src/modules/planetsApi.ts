@@ -3,6 +3,7 @@ import type { PlanetJSON } from "../cosmosApi";
 import { planetVisualShortDescription } from "../cosmosApi";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? "/api";
+const useMockOnly = import.meta.env.VITE_USE_MOCK_ONLY === "true";
 
 /**
  * Каталог межпланетных перелётов («услуги»): только axios, без swagger-клиента —
@@ -78,6 +79,7 @@ function adaptBackendPlanet(raw: BackendPlanetJSON): PlanetJSON {
 }
 
 export async function listPlanetsAxios(params?: { query?: string }): Promise<PlanetJSON[]> {
+  if (useMockOnly) return [];
   try {
     const r = await planetsAxios.get<{ items?: BackendPlanetJSON[] } | BackendPlanetJSON[]>(
       "/interplanetaryflights",
@@ -95,6 +97,7 @@ export async function listPlanetsAxios(params?: { query?: string }): Promise<Pla
 }
 
 export async function getPlanetAxios(id: number): Promise<PlanetJSON | null> {
+  if (useMockOnly) return null;
   try {
     const r = await planetsAxios.get<BackendPlanetJSON>(`/interplanetaryflights/${id}`, {
       headers: { Accept: "application/json" },

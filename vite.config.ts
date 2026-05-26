@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
       ...(useHttps ? [basicSsl()] : []),
       VitePWA({
         registerType: "autoUpdate",
-        includeAssets: ["logo.png", "img/logo.png"],
+        includeAssets: ["logo.png", "pwa-192.png", "pwa-512.png"],
         workbox: {
           maximumFileSizeToCacheInBytes: 25 * 1024 * 1024,
         },
@@ -28,13 +28,13 @@ export default defineConfig(({ mode }) => {
           start_url: ".",
           icons: [
             {
-              src: "logo.png",
-              sizes: "192x192",
+              src: "pwa-192.png",
+              sizes: "128x128",
               type: "image/png",
             },
             {
-              src: "logo.png",
-              sizes: "512x512",
+              src: "pwa-512.png",
+              sizes: "256x256",
               type: "image/png",
             },
           ],

@@ -1,5 +1,6 @@
 import { Link, Outlet } from "react-router-dom";
 import { ROUTES } from "../routePaths";
+import { publicUrl } from "../utils/publicUrl";
 
 export default function GuestLayout() {
   return (
@@ -7,7 +8,7 @@ export default function GuestLayout() {
       <header className="site-header guest-header">
         <div className="site-header-main guest-header__inner">
           <Link to={ROUTES.PLANETS} className="header-home">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Cosmos" className="header-home__icon" />
+            <img src={publicUrl("/logo.png")} alt="Cosmos" className="header-home__icon" />
           </Link>
           <nav className="guest-header__nav" aria-label="Навигация гостя">
             <Link to={ROUTES.PLANETS}>Каталог</Link>
