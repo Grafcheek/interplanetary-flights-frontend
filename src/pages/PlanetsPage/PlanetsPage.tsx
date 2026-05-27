@@ -19,7 +19,7 @@ export default function PlanetsPage() {
   const [loading, setLoading] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [clipSessionActiveState, setClipSessionActive] = useState(false);
-  const clipSessionActive = !isGuestMode && clipSessionActiveState;
+  const clipSessionActive = clipSessionActiveState;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
   const query = useAppSelector((state) => state.planetFilter.query);
@@ -149,15 +149,13 @@ export default function PlanetsPage() {
     <div className="planets-page">
       <div className="toolbar">
         <div className="toolbar-inner">
-          {!isGuestMode ? (
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              className="clip-search-section__file-input"
-              onChange={handleImageUpload}
-            />
-          ) : null}
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            className="clip-search-section__file-input"
+            onChange={handleImageUpload}
+          />
           <PlanetFilterBar
             query={query}
             onQueryChange={(value) => dispatch(setQuery(value))}
@@ -167,7 +165,6 @@ export default function PlanetsPage() {
             clipButtonLabel={clipButtonLabel}
             disableClipSearch={clipItems.length === 0 || showClipProgress}
             disableClipReset={!selectedImageFile && !imageSearchActive}
-            showImageSearch={!isGuestMode}
           />
           {!isGuestMode ? <CartRow /> : null}
         </div>
