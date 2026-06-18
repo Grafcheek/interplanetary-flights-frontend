@@ -20,27 +20,33 @@ export interface WebBackendInternalAppSerializerPlanetJSON {
   is_deleted?: boolean;
 }
 
+/** Элемент списка `GET /interplanetaryflightrequests` (поле `items[]`). */
 export interface WebBackendInternalAppSerializerInterplanetaryFlightRequestJSON {
-  /** ID в ответе списка (бэкенд: `id`). */
   id?: number;
+  /** @deprecated Только legacy на фронте; бэк отдаёт `id`. */
   interplanetary_flight_request_id?: number;
   status?: string;
   created_at?: string;
   creator_login?: string;
   moderator_login?: string | null;
-  /** Дата формирования: в списке — `formed_at`, в swagger — `forming_date`. */
   formed_at?: string | null;
+  /** @deprecated Бэк отдаёт `formed_at`. */
   forming_date?: string | null;
-  /** Дата завершения: в списке — `completed_at`, в swagger — `finish_date`. */
   completed_at?: string | null;
+  /** @deprecated Бэк отдаёт `completed_at`. */
   finish_date?: string | null;
+  /** Алиас при PUT; в БД и в списке — только `theme`. */
   description?: string | null;
   theme?: string | null;
   spacecraft_dry_mass_kg?: number;
   total_fuel_mass_kg?: number | null;
-  route_count?: number;
   routes_count?: number;
+  /** Сегменты с `fuel_mass_kg IS NOT NULL` (расчёт при формировании). */
   segments_with_result?: number;
+}
+
+export interface InterplanetaryFlightRequestListJSON {
+  items?: WebBackendInternalAppSerializerInterplanetaryFlightRequestJSON[];
 }
 
 export interface WebBackendInternalAppSerializerFlightInRequestJSON {
@@ -249,7 +255,7 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       params: RequestParams = {},
     ) =>
       this.request<
-        WebBackendInternalAppSerializerInterplanetaryFlightRequestJSON[],
+        InterplanetaryFlightRequestListJSON,
         Record<string, string>
       >({
         path: `/interplanetaryflightrequests`,

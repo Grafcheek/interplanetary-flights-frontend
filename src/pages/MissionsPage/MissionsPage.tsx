@@ -145,8 +145,8 @@ export default function MissionsPage() {
                 <th>ID</th>
                 <th>Статус</th>
                 <th>Создатель</th>
-                <th>Кол-во планет</th>
-                <th>Тема</th>
+                <th>Посчитано маршрутов</th>
+                <th>Масса аппарата</th>
                 <th>Создана</th>
                 <th>Формирование</th>
                 <th>Завершение</th>
@@ -173,9 +173,11 @@ export default function MissionsPage() {
                     </td>
                     <td>{statusLabel(row.status)}</td>
                     <td>{row.creator_login ?? "—"}</td>
-                    <td className="missions-page__num">{row.route_count}</td>
-                    <td className="missions-page__theme">
-                      {row.theme?.trim() || row.description?.trim() || "—"}
+                    <td className="missions-page__num">{row.segments_with_result}</td>
+                    <td className="missions-page__num">
+                      {row.spacecraft_dry_mass_kg > 0
+                        ? `${row.spacecraft_dry_mass_kg.toLocaleString("ru-RU")} кг`
+                        : "—"}
                     </td>
                     <td>
                       {row.created_at

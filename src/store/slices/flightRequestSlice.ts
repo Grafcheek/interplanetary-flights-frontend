@@ -42,20 +42,21 @@ function mapPlanet(p: WebBackendInternalAppSerializerPlanetJSON): PlanetJSON {
 function mapFlightRequestRow(
   fr: WebBackendInternalAppSerializerInterplanetaryFlightRequestJSON,
 ): FlightRequestListRow {
-  const requestId = Number(fr.interplanetary_flight_request_id ?? fr.id ?? 0);
+  const requestId = Number(fr.id ?? fr.interplanetary_flight_request_id ?? 0);
+  const theme = fr.theme ?? fr.description ?? "";
   return {
     interplanetary_flight_request_id: requestId,
     status: fr.status ?? "",
     created_at: fr.created_at != null ? String(fr.created_at) : "",
     creator_login: fr.creator_login ?? "",
     moderator_login: fr.moderator_login ?? null,
-    forming_date: fr.forming_date ?? fr.formed_at ?? null,
-    finish_date: fr.finish_date ?? fr.completed_at ?? null,
-    description: fr.description ?? fr.theme ?? null,
-    theme: fr.theme ?? fr.description ?? null,
+    forming_date: fr.formed_at ?? fr.forming_date ?? null,
+    finish_date: fr.completed_at ?? fr.finish_date ?? null,
+    description: theme || null,
+    theme: theme || null,
     spacecraft_dry_mass_kg: Number(fr.spacecraft_dry_mass_kg ?? 0),
     total_fuel_mass_kg: fr.total_fuel_mass_kg ?? null,
-    route_count: Number(fr.routes_count ?? fr.route_count ?? 0),
+    route_count: Number(fr.routes_count ?? 0),
     segments_with_result: Number(fr.segments_with_result ?? 0),
   };
 }
@@ -152,15 +153,12 @@ function asDetail(data: unknown): FlightRequestDetail | null {
   const flights = (Array.isArray(itemsRaw) ? itemsRaw : []).map(rowFromBackend);
   const totalDv = flights.reduce((s, r) => s + r.delta_v_ms, 0);
   const totalFuel = flights.reduce((s, r) => s + r.propellant_kg, 0);
-  const id = Number(
-    headerRaw.interplanetary_flight_request_id ??
-      (o.id as number | undefined) ??
-      0,
-  );
+  const id = Number(headerRaw.id ?? headerRaw.interplanetary_flight_request_id ?? o.id ?? 0);
+  const theme = headerRaw.theme ?? headerRaw.description ?? "";
   return {
     interplanetary_flight_request_id: id,
     title: "Заявка на расчёт",
-    description: headerRaw.description ?? headerRaw.theme ?? "",
+    description: theme,
     route_count: flights.length,
     engine_mass_kg: 0,
     spacecraft_dry_mass_kg: Number(headerRaw.spacecraft_dry_mass_kg ?? 0),
@@ -170,8 +168,8 @@ function asDetail(data: unknown): FlightRequestDetail | null {
     status: headerRaw.status ?? "draft",
     creator_login: headerRaw.creator_login ?? "",
     moderator_login: headerRaw.moderator_login ?? null,
-    forming_date: headerRaw.forming_date ?? null,
-    finish_date: headerRaw.finish_date ?? null,
+    forming_date: headerRaw.formed_at ?? headerRaw.forming_date ?? null,
+    finish_date: headerRaw.completed_at ?? headerRaw.finish_date ?? null,
     created_at: headerRaw.created_at != null ? String(headerRaw.created_at) : "",
   };
 }
