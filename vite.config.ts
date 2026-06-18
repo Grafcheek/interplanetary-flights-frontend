@@ -1,16 +1,26 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import basicSsl from "@vitejs/plugin-basic-ssl";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  if (mode === "tauri") {
+    // Force .env.tauri values for Tauri builds even if OS-level env vars are stale.
+    Object.entries(env)
+      .filter(([key]) => key.startsWith("VITE_"))
+      .forEach(([key, value]) => {
+        process.env[key] = value;
+      });
+  }
   const useHttps = mode === "https";
 
   return {
     base: env.VITE_BASE_PATH || "/",
     plugins: [
       react(),
+      svelte(),
       ...(useHttps ? [basicSsl()] : []),
       VitePWA({
         registerType: "autoUpdate",

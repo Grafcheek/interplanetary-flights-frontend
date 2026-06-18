@@ -15,3 +15,9 @@ declare module "*.png" {
   const src: string;
   export default src;
 }
+
+declare module "*.svelte" {
+  import type { Component } from "svelte";
+  const component: Component;
+  export default component;
+}

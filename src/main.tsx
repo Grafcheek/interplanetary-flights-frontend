@@ -5,7 +5,16 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import { store } from "./store";
 
-registerSW({ immediate: true });
+if (import.meta.env.MODE !== "tauri") {
+  registerSW({ immediate: true });
+} else if ("serviceWorker" in navigator) {
+  // In Tauri we disable PWA caching to avoid stale bundled assets.
+  void navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => {
+      void registration.unregister();
+    });
+  });
+}
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
