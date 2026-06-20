@@ -5,10 +5,10 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import { store } from "./store";
 
-if (import.meta.env.MODE !== "tauri") {
+if (import.meta.env.PROD && import.meta.env.MODE !== "tauri") {
   registerSW({ immediate: true });
 } else if ("serviceWorker" in navigator) {
-  // In Tauri we disable PWA caching to avoid stale bundled assets.
+  // Service worker ломает crossOriginIsolated, нужный WebLLM в dev.
   void navigator.serviceWorker.getRegistrations().then((registrations) => {
     registrations.forEach((registration) => {
       void registration.unregister();

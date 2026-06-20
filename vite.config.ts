@@ -6,18 +6,34 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  const viteVars = Object.fromEntries(
+    Object.entries(env).filter(([key]) => key.startsWith("VITE_")),
+  );
+
   if (mode === "tauri") {
     // Force .env.tauri values for Tauri builds even if OS-level env vars are stale.
-    Object.entries(env)
-      .filter(([key]) => key.startsWith("VITE_"))
-      .forEach(([key, value]) => {
-        process.env[key] = value;
-      });
+    Object.entries(viteVars).forEach(([key, value]) => {
+      process.env[key] = value;
+    });
   }
+
   const useHttps = mode === "https";
+  const tauriEnvDefines =
+    mode === "tauri"
+      ? Object.fromEntries(
+          Object.entries(viteVars).map(([key, value]) => [
+            `import.meta.env.${key}`,
+            JSON.stringify(value),
+          ]),
+        )
+      : {};
 
   return {
     base: env.VITE_BASE_PATH || "/",
+    define: tauriEnvDefines,
+    optimizeDeps: {
+      exclude: ["@mlc-ai/web-llm"],
+    },
     plugins: [
       react(),
       svelte(),
@@ -62,6 +78,11 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: "http://localhost:8080",
           changeOrigin: true,
+        },
+        "/minio": {
+          target: "http://localhost:9000",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/minio/, ""),
         },
       },
     },

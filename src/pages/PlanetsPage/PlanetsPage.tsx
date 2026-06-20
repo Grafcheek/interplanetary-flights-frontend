@@ -1,17 +1,26 @@
-import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
 import PlanetsList from "../../components/PlanetsList/PlanetsList";
 import PlanetFilterBar from "../../components/PlanetFilterBar/PlanetFilterBar";
+import PlanetLlmSearchPanel from "../../components/llm/PlanetLlmSearchPanel";
 import CartRow from "../../components/CartRow/CartRow";
 import type { PlanetJSON } from "../../cosmosApi";
 import { planetClipDescription } from "../../cosmosApi";
 import { filterMockPlanetsByQuery, PLANETS_MOCK } from "../../modules/mock";
+import {
+  applyPlanetSearchFilters,
+  buildBackendQuery,
+  expandSearchQuery,
+} from "../../modules/llm/planetSearchParams";
 import { listPlanetsAxios } from "../../modules/planetsApi";
 import { usePlanetImageSearch } from "../../hooks/usePlanetImageSearch";
 import { isGuestMode } from "../../config/appMode";
+import type { PlanetSearchParams } from "../../types/llmTypes";
+import { isTauriRuntime } from "../../utils/isTauriRuntime";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { applyQuery, setQuery } from "../../store/slices/planetFilterSlice";
+import { applyQuery, resetQuery, setQuery } from "../../store/slices/planetFilterSlice";
+import { PLANETS_FILTERS_RESET_EVENT } from "../../modules/planetFiltersReset";
 
 export default function PlanetsPage() {
   const [planets, setPlanets] = useState<PlanetJSON[]>(PLANETS_MOCK);
@@ -19,15 +28,22 @@ export default function PlanetsPage() {
   const [loading, setLoading] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [clipSessionActiveState, setClipSessionActive] = useState(false);
+  const [llmSearchParams, setLlmSearchParams] = useState<PlanetSearchParams | null>(null);
   const clipSessionActive = clipSessionActiveState;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
   const query = useAppSelector((state) => state.planetFilter.query);
   const appliedQuery = useAppSelector((state) => state.planetFilter.appliedQuery);
+  const showWebLlm = !isTauriRuntime();
 
-  const loadPlanets = async (queryText: string) => {
+  const loadPlanets = async (queryText: string, llmParams: PlanetSearchParams | null) => {
     const normalized = queryText.trim();
-    const data = await listPlanetsAxios(normalized ? { query: normalized } : undefined);
+    const apiQuery = normalized ? expandSearchQuery(normalized) : "";
+    let data = await listPlanetsAxios(apiQuery ? { query: apiQuery } : undefined);
+
+    if (llmParams) {
+      data = applyPlanetSearchFilters(data, llmParams);
+    }
 
     if (data.length > 0) {
       setPlanets(data);
@@ -35,8 +51,9 @@ export default function PlanetsPage() {
       return;
     }
 
-    if (normalized) {
-      const filtered = filterMockPlanetsByQuery(normalized);
+    if (normalized || llmParams) {
+      let filtered = normalized ? filterMockPlanetsByQuery(normalized) : [...PLANETS_MOCK];
+      if (llmParams) filtered = applyPlanetSearchFilters(filtered, llmParams);
       setPlanets(filtered);
       setClipSourcePlanets(filtered);
       return;
@@ -50,7 +67,7 @@ export default function PlanetsPage() {
     let cancelled = false;
     const run = async () => {
       try {
-        await loadPlanets(appliedQuery);
+        await loadPlanets(appliedQuery, llmSearchParams);
         if (cancelled) return;
       } catch {
         if (cancelled) return;
@@ -62,7 +79,7 @@ export default function PlanetsPage() {
     return () => {
       cancelled = true;
     };
-  }, [appliedQuery]);
+  }, [appliedQuery, llmSearchParams]);
 
   const clipItems = useMemo(
     () =>
@@ -87,10 +104,11 @@ export default function PlanetsPage() {
   }, [clipSourcePlanets]);
 
   const handleSearch = async () => {
+    setLlmSearchParams(null);
     dispatch(applyQuery());
     setLoading(true);
     try {
-      await loadPlanets(query);
+      await loadPlanets(query, null);
     } catch {
       const filtered = filterMockPlanetsByQuery(query);
       setPlanets(filtered);
@@ -98,6 +116,13 @@ export default function PlanetsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLlmSearchParams = (params: PlanetSearchParams) => {
+    const backendQuery = buildBackendQuery(params);
+    setLlmSearchParams(params);
+    dispatch(setQuery(backendQuery));
+    dispatch(applyQuery());
   };
 
   const handleUploadButtonClick = () => {
@@ -111,11 +136,23 @@ export default function PlanetsPage() {
     setSelectedImageFile(file);
   };
 
-  const handleClearImage = () => {
+  const handleClearImage = useCallback(() => {
     setSelectedImageFile(null);
     resetSearch();
     if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+  }, [resetSearch]);
+
+  const resetAllFilters = useCallback(() => {
+    setLlmSearchParams(null);
+    handleClearImage();
+    dispatch(resetQuery());
+  }, [dispatch, handleClearImage]);
+
+  useEffect(() => {
+    const onReset = () => resetAllFilters();
+    window.addEventListener(PLANETS_FILTERS_RESET_EVENT, onReset);
+    return () => window.removeEventListener(PLANETS_FILTERS_RESET_EVENT, onReset);
+  }, [resetAllFilters]);
 
   useEffect(() => {
     if (!clipReady || !selectedImageFile) return;
@@ -156,16 +193,19 @@ export default function PlanetsPage() {
             className="clip-search-section__file-input"
             onChange={handleImageUpload}
           />
-          <PlanetFilterBar
-            query={query}
-            onQueryChange={(value) => dispatch(setQuery(value))}
-            onSearch={handleSearch}
-            onImageUploadClick={handleUploadButtonClick}
-            onClearImage={handleClearImage}
-            clipButtonLabel={clipButtonLabel}
-            disableClipSearch={clipItems.length === 0 || showClipProgress}
-            disableClipReset={!selectedImageFile && !imageSearchActive}
-          />
+          <div className="toolbar-search-stack">
+            <PlanetFilterBar
+              query={query}
+              onQueryChange={(value) => dispatch(setQuery(value))}
+              onSearch={handleSearch}
+              onImageUploadClick={handleUploadButtonClick}
+              onClearImage={handleClearImage}
+              clipButtonLabel={clipButtonLabel}
+              disableClipSearch={clipItems.length === 0 || showClipProgress}
+              disableClipReset={!selectedImageFile && !imageSearchActive}
+            />
+            {showWebLlm ? <PlanetLlmSearchPanel onSearchParams={handleLlmSearchParams} /> : null}
+          </div>
           {!isGuestMode ? <CartRow /> : null}
         </div>
       </div>

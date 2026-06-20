@@ -1,7 +1,16 @@
+import { useEffect, useState } from "react";
+import { API_BASE_URL, BUILD_STAMP, MINIO_BASE } from "../../config/apiEndpoints";
+import { isGuestMode } from "../../config/appMode";
+
 export default function GuestInfoPage() {
-  const apiBase = import.meta.env.VITE_API_BASE_URL ?? "/api";
-  const minioBase = import.meta.env.VITE_MINIO_BASE ?? "(not set)";
-  const mode = import.meta.env.MODE;
+  const [exeDir, setExeDir] = useState("");
+
+  useEffect(() => {
+    if (!isGuestMode) return;
+    void import("@tauri-apps/api/path")
+      .then(({ executableDir }) => executableDir())
+      .then(setExeDir);
+  }, []);
 
   return (
     <div className="guest-info-page">
@@ -12,21 +21,23 @@ export default function GuestInfoPage() {
           страница маршрута без авторизации и редактирования заявок.
         </p>
         <p>
-          <strong>API:</strong> <code>{apiBase}</code>
+          <strong>API:</strong> <code>{API_BASE_URL}</code>
         </p>
         <p className="guest-info-page__hint">
-          На защите сравните IP backend из консоли сервера с адресом в <code>.env</code> (
-          <code>VITE_API_BASE_URL</code>).
+          На защите сравните IP backend из консоли сервера с адресом выше (ZeroTier /{" "}
+          <code>.env.tauri</code>).
         </p>
         <p className="guest-info-page__hint">
-          <strong>Build mode:</strong> <code>{mode}</code>
+          <strong>Build stamp:</strong> <code>{BUILD_STAMP}</code>
         </p>
         <p className="guest-info-page__hint">
-          <strong>VITE_API_BASE_URL:</strong> <code>{apiBase}</code>
+          <strong>MINIO:</strong> <code>{MINIO_BASE}</code>
         </p>
-        <p className="guest-info-page__hint">
-          <strong>VITE_MINIO_BASE:</strong> <code>{minioBase}</code>
-        </p>
+        {exeDir ? (
+          <p className="guest-info-page__hint">
+            <strong>Exe folder:</strong> <code>{exeDir}</code>
+          </p>
+        ) : null}
       </div>
     </div>
   );

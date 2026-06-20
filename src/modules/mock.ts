@@ -1,10 +1,13 @@
-import type {
-  InterplanetaryFlightRequestDetailJSON,
-  PlanetCartJSON,
-  PlanetInRequestRowJSON,
-  PlanetJSON,
+import {
+  calculateHohmannDeltaVms,
+  calculatePropellantKg,
+  planetVisualShortDescription,
+  type InterplanetaryFlightRequestDetailJSON,
+  type PlanetCartJSON,
+  type PlanetInRequestRowJSON,
+  type PlanetJSON,
 } from "../cosmosApi";
-import { calculateHohmannDeltaVms, calculatePropellantKg, planetVisualShortDescription } from "../cosmosApi";
+import { planetMatchesQuery } from "./llm/planetSearchParams";
 
 const DEFAULT_IMAGE = "/mock/Earth.jpg";
 const DEFAULT_VIDEO = "/mock/Earth_vid.mp4";
@@ -174,18 +177,11 @@ export function getMockSegmentForPlanet(planetId: number): PlanetInRequestRowJSO
   return MOCK_INTERPLANETARY_FLIGHT_DETAIL.flights_in_request.find((r) => r.planet_id === planetId);
 }
 
-/** Поиск по названию планеты и полям маршрута (откуда / куда), как в lab1. */
+/** Поиск по названию, маршруту и описанию. */
 export function filterMockPlanetsByQuery(query: string): PlanetJSON[] {
   const q = query.trim();
   if (!q) return [...PLANETS_MOCK];
-
-  const t = q.toLowerCase();
-  return PLANETS_MOCK.filter(
-    (p) =>
-      p.title.toLowerCase().includes(t) ||
-      p.from.toLowerCase().includes(t) ||
-      p.to.toLowerCase().includes(t),
-  );
+  return PLANETS_MOCK.filter((p) => planetMatchesQuery(p, q));
 }
 
 export function cloneInterplanetaryFlightDetail(

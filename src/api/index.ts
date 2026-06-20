@@ -1,6 +1,7 @@
 import { Api } from "./Api";
+import { API_BASE_URL } from "../config/apiEndpoints";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? "/api";
+const baseURL = API_BASE_URL;
 
 export const api = new Api({
   baseURL,

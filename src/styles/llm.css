@@ -1,0 +1,51 @@
+.llm-search-row {
+  width: 100%;
+  min-width: 0;
+}
+
+.llm-search-row .planet-filter-toolbar__input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.llm-search-row__load-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.llm-panel__loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  min-height: 40px;
+}
+
+.llm-panel__loading progress {
+  flex: 1;
+  max-width: 200px;
+}
+
+.llm-panel__debug {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.llm-panel__debug-btn {
+  background: none;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.75rem;
+}
+
+.llm-panel__debug pre {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  color: var(--color-muted);
+}

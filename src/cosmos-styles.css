@@ -943,6 +943,14 @@ a.card img {
     min-width: 0;
 }
 
+.toolbar-search-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
 .planet-filter-toolbar__row {
     display: flex;
     align-items: stretch;

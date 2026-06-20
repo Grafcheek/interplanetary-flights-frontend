@@ -1,8 +1,9 @@
 import axios from "axios";
 import type { PlanetJSON } from "../cosmosApi";
 import { planetVisualShortDescription } from "../cosmosApi";
+import { API_BASE_URL } from "../config/apiEndpoints";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? "/api";
+const baseURL = API_BASE_URL;
 const useMockOnly = import.meta.env.VITE_USE_MOCK_ONLY === "true";
 
 /**

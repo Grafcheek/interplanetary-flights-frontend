@@ -45,9 +45,10 @@ export type PlanetCartJSON = {
 
 export const CART_UPDATED_EVENT = "interplanetary-flight-request-cart-updated";
 
+import { MINIO_BASE } from "./config/apiEndpoints";
+
 function minioBase(): string {
-  const raw = import.meta.env.VITE_MINIO_BASE as string | undefined;
-  return raw?.replace(/\/$/, "") ?? "http://localhost:9000";
+  return MINIO_BASE.replace(/\/$/, "");
 }
 
 import { publicUrl } from "./utils/publicUrl";
